@@ -1,0 +1,666 @@
+:root {
+  --dark-blue: #001129;
+  --blue: #0c5776;
+  --aqua-blue: #2d99ae;
+  --light-blue: #bcfffe;
+  --white: #f8dad0;
+}
+::-webkit-scrollbar {
+  display: none;
+}
+::placeholder {
+  text-align: center;
+  color: var(--white);
+}
+::-webkit-input-placeholder {
+  text-align: center;
+}
+* {
+  color: var(--white);
+  margin: 0;
+  padding: 0;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: fit-content;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+body {
+  overflow: auto;
+  background-color: var(--dark-blue);
+  color: var(--white);
+  scroll-behavior: smooth;
+  font-family: sans-serif;
+  overflow-x: hidden;
+  background: radial-gradient(
+      circle at 120% 50%,
+      var(--aqua-blue) 5%,
+      var(--blue) 10%,
+      var(--dark-blue),
+      var(--dark-blue) 50%
+    ),
+    radial-gradient(
+      circle at -20% 75%,
+      var(--aqua-blue) 5%,
+      var(--blue) 10%,
+      var(--dark-blue),
+      var(--dark-blue) 50%
+    );
+}
+section {
+  background-color: transparent;
+  width: 100vw;
+  height: 100vh;
+  min-height: calc(100vh - 50px);
+}
+#greeting > h1 {
+  color: var(--white) !important;
+  font-weight: 800 !important;
+  font-size: calc(5.5vw + 5vh) !important;
+  height: calc(100vh - 100px);
+  font-size: min(10vw, 10vh);
+}
+h2 {
+  margin: auto;
+  width: fit-content;
+  margin-top: 50px;
+  font-size: calc(5vw + 2vh) !important;
+}
+hr {
+  border-top: 5px dotted var(--blue) !important;
+  width: calc(90vw - 20px) !important;
+  margin: auto !important;
+}
+input {
+  display: block;
+  color: var(--white);
+  background-color: #00000000;
+  border: 1px solid white;
+  height: 50px;
+  width: 100%;
+  margin-bottom: 5%;
+}
+textarea {
+  color: var(--white);
+  background-color: #00000000;
+  border: 1px solid white;
+  display: block;
+  resize: none;
+}
+a {
+  color: var(--white);
+  text-decoration: none !important;
+  font-size: 2vw;
+}
+/* Color classes */
+.font-dark-blue {
+  color: var(--dark-blue);
+}
+.font-blue {
+  color: var(--blue);
+}
+.font-aqua-blue {
+  color: var(--aqua-blue);
+}
+.font-light-blue {
+  color: var(--light-blue);
+}
+.font-white {
+  color: var(--light-blue);
+}
+/*Other classes*/
+.drop {
+  float: left;
+  font-size: 50px;
+  line-height: 1;
+  padding-top: 5px;
+  padding-right: 2px;
+  margin-left: -3px;
+}
+.drop:before,
+.drop:after {
+  content: "";
+  display: block;
+}
+.drop:before {
+  margin-top: -0.2em;
+}
+.drop:after {
+  margin-bottom: -0.3em;
+}
+
+.modal {
+  width: 100vw;
+  height: fit-content;
+  max-height: 100vh;
+  margin: auto;
+}
+.modal * {
+  max-width: 100%;
+}
+
+.modal-dialog {
+  min-width: fit-content !important;
+}
+/* Section 1 -- Greeting */
+#s1Box {
+  display: block;
+  border: 2px solid var(--white);
+  color: var(--dark-blue);
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 100;
+  font-size: 20px;
+  padding: 10px 5px 10px 5px;
+  text-align: center;
+  box-shadow: 5px 5px var(--aqua-blue);
+  background-color: var(--light-blue);
+  margin: auto;
+}
+#s1Box:hover {
+  cursor: pointer;
+  transform: translateY(-2px) translateX(-2px);
+}
+/* Section 2 -- about me */
+#about {
+  height: fit-content;
+  font-size: 18px !important;
+}
+#pfpBorder {
+  aspect-ratio: 1/1;
+  overflow: hidden;
+  padding: 15px;
+  background-color: var(--aqua-blue);
+  background: linear-gradient(var(--light-blue), var(--aqua-blue), var(--blue));
+  border-radius: 1000px;
+  animation: anti-pfp 8s linear infinite;
+}
+#pfp {
+  max-width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 1000px;
+  object-fit: cover;
+  animation: pfp 8s linear infinite;
+}
+#about-text {
+  background-color: var(--dark-blue);
+  box-shadow: 0px 0px 10px var(--aqua-blue);
+  border-radius: 20px;
+  height: fit-content;
+  max-height: 100%;
+}
+/* Section 3 -- toolkit */
+#tools {
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(max(150px, calc(100% - 20px) / 5), 1fr)
+  );
+  display: grid;
+  gap: 20px;
+  width: 100%;
+}
+.toolItem,
+.toolItemContainer {
+  min-height: 150px;
+  min-width: 150px;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1/1;
+  background-color: var(--blue);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.toolItemFront {
+  height: 80% !important;
+  width: 80% !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+.toolItemFront img {
+  filter: brightness(0) invert(1);
+  max-height: 100%;
+}
+.toolItemFront h3 {
+  font-size: 2vw;
+}
+.toolDescription {
+  font-size: 20px;
+  display: -webkit-box;
+  line-clamp: 5;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Section 4 -- Projects*/
+#projectGrid {
+  display: grid;
+  margin-top: 50px !important;
+}
+.project {
+  max-height: 100%;
+  position: relative;
+  background-color: var(--aqua-blue);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0px 0px 10px var(--aqua-blue);
+}
+.project img {
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  min-width: 100%;
+  min-height: 100%;
+  height: 100%;
+  width: 100%;
+}
+.project h3 {
+  text-align: center;
+  width: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--dark-blue);
+}
+/* Section 5 -- Certificates */
+#certificateGrid {
+  grid-template-columns: repeat(2, 1fr);
+  display: grid;
+  gap: 20px;
+  width: 100%;
+  height: 80%;
+}
+#certificateGrid > button {
+  height: 100%;
+  background-color: transparent;
+}
+#certificateGrid > button:hover {
+  width: calc(100% + 5px);
+  height: calc(100% + 5px);
+}
+#certificateGrid > button > img {
+  width: fit-content;
+  height: fit-content;
+  max-height: 100%;
+  max-width: 100%;
+}
+@media only screen and (orientation: landscape) and (min-width: 700px) and (min-height: 500px) {
+  #greeting {
+    display: flex;
+    flex-direction: column;
+  }
+  #s1Box {
+    position: relative;
+    width: 200px;
+    margin-bottom: 50px;
+  }
+  #about {
+    display: grid;
+    grid-template-columns: repeat(8, 12.5%);
+    grid-template-rows: repeat(8, 12.5%);
+    height: 100vh !important;
+    align-items: center;
+  }
+  #pfpBorder {
+    grid-area: 1 / 1 / 9 / 5;
+    margin-left: -33%;
+    max-width: 100%;
+    max-height: 80%;
+    margin-top: 0px;
+    position: relative;
+    bottom: 0px;
+  }
+  #pfp {
+    width: 100% !important;
+    width: 100% !important;
+  }
+  #about > h2 {
+    grid-area: 2 / 5 / 2 / 8;
+    width: 100%;
+    margin: 0px;
+  }
+  #about-text {
+    grid-area: 3 / 5 / 7 / 9;
+    width: 90%;
+    max-height: 90%;
+    padding: 20px;
+    overflow: auto;
+  }
+  #about-text p {
+    height: fit-content;
+    overflow: auto;
+    width: 100%;
+  }
+  a[href="#toolkit"] {
+    grid-area: 7 / 5 / 8 / 6;
+    width: 125%;
+    margin-right: -25%;
+    text-align: center;
+    border: 2px solid var(--light-blue);
+    border-radius: 50px;
+    text-decoration: none;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    color: var(--light-blue);
+  }
+  a[href="#contact"] {
+    grid-area: 7 / 8 / 8 / 9;
+    width: fit-content;
+    border: 2px solid var(--light-blue);
+    background-color: var(--light-blue);
+    border-radius: 50px;
+    text-decoration: none;
+    width: 125%;
+    margin-left: -25%;
+    text-align: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    color: var(--dark-blue);
+    transform: translateX(-25%);
+  }
+  #toolkit {
+    height: fit-content;
+  }
+  #tools {
+    margin-bottom: 10px;
+    width: 80%;
+    margin: auto;
+    padding: 25px;
+    align-items: center;
+    justify-items: center;
+  }
+  .toolItemFront img {
+    height: 80%;
+  }
+  .toolItemBack p {
+    margin: 20px;
+  }
+  .toolItemContainer {
+    perspective: 1000px;
+    color: var(--white);
+    background-color: unset !important;
+    aspect-ratio: 1/1;
+  }
+  .toolItem {
+    border: 2px solid var(--light-blue);
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 1s;
+    border-radius: 50px;
+  }
+  .toolItemFront,
+  .toolItemBack {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--blue);
+    flex-direction: column;
+    border-radius: 50px;
+  }
+  .toolItemBack {
+    transform: rotateY(180deg);
+  }
+  .toolItemContainer:hover .toolItem {
+    transform: rotateY(180deg);
+  }
+  #projectGrid {
+    grid-template-columns: repeat(2, 1fr);
+    width: 80%;
+    margin: auto;
+  }
+  #contact {
+    display: grid;
+    height: 100vh;
+    width: 100vw;
+    grid-template-columns: repeat(8, calc(12.5% - 20px));
+    grid-template-rows: repeat(8, calc(12.5% - 20px));
+    gap: 20px;
+  }
+  #contact h2 {
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    text-align: left;
+    grid-area: 2 / 2 / 3 / 5;
+    line-height: 70px;
+  }
+  #contactMeText {
+    width: 100%;
+    height: 100%;
+    grid-area: 3 / 2 / 5 / 5;
+  }
+  #pc,
+  #pc canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  #pc {
+    grid-area: 5 / 2 / 8 / 5;
+  }
+  #contactForm {
+    grid-area: 3 / 5 / 9 / 9;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 20px;
+  }
+  #contactForm * {
+    width: 100%;
+    height: 100%;
+    margin: 0px !important;
+  }
+  #contactForm > #phone {
+    grid-area: 4 / 1 / 5 / 1;
+  }
+  #contactForm > #details {
+    grid-area: 2 / 2 / 5 / 2;
+  }
+  #contactForm > #submit {
+    grid-area: 5 / 1 / 6 / 3;
+  }
+  @media only screen and (max-width: 500px) {
+    #projectGrid {
+      height: 20%;
+    }
+  }
+  @media only screen and (max-height: 650px) {
+    #pc {
+      display: none;
+    }
+  }
+  @media only screen and (max-width: 800px) {
+  }
+
+  @media only screen and (max-width: 1100px) {
+    #about h2 {
+      width: 125% !important;
+    }
+  }
+  @media only screen and (max-width: 1300px) {
+    #contactMeText {
+      margin-top: 12.5%;
+    }
+    #contact h2 {
+      width: 200%;
+    }
+  }
+  @media only screen and (max-width: 1000px) {
+    #pc {
+      display: none;
+    }
+    .toolItemFront img {
+      height: calc(100% - 60px);
+    }
+  }
+}
+@media screen and (orientation: portrait),
+  screen and (max-width: 700px),
+  screen and (max-height: 500px) {
+  a:not(.toolItemContainer, .project) {
+    display: none;
+  }
+  #s1Box {
+    position: absolute;
+    width: 80%;
+    margin: auto;
+    bottom: 50px;
+    left: 0px;
+    right: 0px;
+  }
+  #pfpBorder {
+    width: 80%;
+    margin: auto;
+    margin-top: 50px;
+  }
+  #about-text {
+    width: 80%;
+    margin: auto;
+    margin-top: 50px;
+    margin-bottom: 50px;
+    padding: 20px;
+    font-size: 20px;
+  }
+  #projectGrid {
+    width: 80%;
+    margin: auto;
+    grid-template-columns: repeat(1, 1fr);
+    grid-template-rows: 400px;
+    height: 200px;
+    justify-items: center;
+    align-items: center;
+  }
+  #toolsWrapper {
+    width: 80%;
+    margin: auto;
+    height: calc(100vh - 145px);
+    margin-top: 50px;
+    overflow: scroll;
+  }
+  #tools {
+    overflow: auto;
+    min-height: 100%;
+    height: fit-content;
+  }
+  .toolItemFront {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+  }
+  .toolItemFront img {
+    height: calc(100% - 60px);
+  }
+  .toolItemFront h3{
+    font-size: 20px !important;
+  }
+  .toolItemBack {
+    display: none;
+  }
+  #contact {
+    height: calc(100% - 50px);
+  }
+  #contactMeText {
+    display: none;
+  }
+  #contactForm {
+    margin-top: 50px !important;
+    height: calc(100vh - 155px);
+    margin: auto;
+    width: 80%;
+    display: grid;
+    grid-template-rows: repeat(9, 1fr);
+    gap: 10px;
+  }
+  #certificates {
+    height: fit-content;
+  }
+  #certificateGrid {
+    grid-template-columns: repeat(1, 1fr);
+    grid-auto-flow: column !important;
+    grid-template-rows: repeat(2, 1fr);
+  }
+  input {
+    margin: 0px;
+    height: 100%;
+  }
+  #details {
+    grid-area: span 3;
+  }
+  #pc {
+    display: none;
+  }
+  @media only screen and (max-width: 400px) {
+  }
+  @media only screen and (max-height: 500px) {
+    #projectGrid {
+      grid-template-rows: 200px;
+    }
+  }
+  @media only screen and (min-width: 750px) {
+    .project h3 {
+      font-size: 50px;
+    }
+    .toolItemFront img {
+      height: calc(100% - 90px);
+    }
+    #pfpBorder {
+      width: 60%;
+    }
+    #about-text {
+      width: 60%;
+    }
+  }
+  @media only screen and (max-height: 600px) {
+
+    #contact {
+      height: 130vh !important;
+    }
+    #contactForm {
+      height: calc(130vh - 155px);
+    }
+  }
+  @media only screen and (max-height: 500px) and (max-width: 1250px) {
+  }
+}
+@media only screen and (max-height: 400px) {
+  #contact {
+    height: 150vh !important;
+  }
+  #contactForm {
+    height: calc(150vh - 155px);
+  }
+}
+
+@keyframes pfp {
+  0% {
+    rotate: 0deg;
+  }
+  50% {
+    rotate: 180deg;
+  }
+  100% {
+    rotate: 360deg;
+  }
+}
+@keyframes anti-pfp {
+  0% {
+    rotate: 0deg;
+  }
+  50% {
+    rotate: -180deg;
+  }
+  100% {
+    rotate: -360deg;
+  }
+}

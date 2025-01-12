@@ -1,0 +1,4 @@
+I'm Sander, a passionate student at Royal Atheneum Keerbergen.
+In my free time, I learned how to code, currently I'm studying cs at Harvard trough edX. I have always been passionate about the world around me, especially computers. 
+Since I was little, I have coded a lot; at the age of 9, I started coding in Scratch.
+Later on, at age 12, I tried a bit of Lua, and now I'm a full-stack web developer.
