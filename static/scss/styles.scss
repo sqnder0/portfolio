@@ -1,0 +1,701 @@
+@use "sass:map";
+
+// colors
+$colors: (
+  "dark-blue": #001129,
+  "blue": #0c5776,
+  "aqua-blue": #2d99ae,
+  "light-blue": #bcfffe,
+  "white": #f8dad0,
+  "transparent": #00000000,
+);
+
+// color aliasses
+$dark-blue: map.get($colors, "dark-blue");
+$blue: map.get($colors, "blue");
+$aqua: map.get($colors, "aqua-blue");
+$light-blue: map.get($colors, "light-blue");
+$white: map.get($colors, "white");
+$transparent: map.get($colors, "transparent");
+
+// Typography
+$typography: (
+  "base-font-size": 16px,
+  "small-header-font-size": calc(1vh + 1vw),
+  "header-font-size": calc(5vw + 2vh),
+  "big-header-font-size": calc(5.5vw + 5vh),
+);
+
+// Aspect ratio's
+$ratios: (
+  "square": 1,
+);
+// Border radius'
+$border: (
+  "default-radius": 20px,
+  "m-radius": 50px,
+  "circle-radius": 1000px,
+  "size": 2px,
+);
+
+// Grid properties
+$grid: (
+  "gap": 20px,
+);
+
+* {
+  // Default font color
+  color: $white;
+  margin: 0;
+  padding: 0;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+::placeholder {
+  text-align: center;
+  color: $white;
+}
+
+::-webkit-input-placeholder {
+  text-align: center;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: fit-content;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  overflow: auto;
+  background-color: $dark-blue;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+
+  //   Background pulse circles
+  background: radial-gradient(
+      circle at 120% 50%,
+      $aqua 5%,
+      $blue 10%,
+      $dark-blue,
+      $dark-blue 50%
+    ),
+    radial-gradient(
+      circle at -20% 75%,
+      $aqua 5%,
+      $blue 10%,
+      $dark-blue,
+      $dark-blue 50%
+    );
+}
+
+section {
+  background-color: $transparent;
+  width: 100vw;
+  min-height: calc(100vh - 50px);
+  height: 100vh;
+}
+
+h2 {
+  margin: auto;
+  width: fit-content;
+  margin-top: 50px;
+  font-size: map.get($typography, "header-font-size") !important;
+}
+
+hr {
+  border-top: 5px dotted $blue !important;
+  width: calc(90vw - 20px);
+  margin: auto !important;
+}
+
+input {
+  display: block;
+  color: $white;
+  background-color: $transparent;
+  border: 1px solid $white;
+  height: 50px;
+  width: 100%;
+  margin-bottom: 5%;
+}
+
+form textarea {
+  color: $white;
+  background-color: $transparent;
+  border: 1px solid $white;
+  display: block;
+  resize: none;
+  min-height: 100%;
+  max-height: 100%;
+}
+
+a {
+  color: $white;
+  text-decoration: none !important;
+  font-size: 2vw;
+}
+// Color classes
+
+.font-dark-blue {
+  color: $dark-blue;
+}
+.font-blue {
+  color: $blue;
+}
+.font-aqua {
+  color: $aqua;
+}
+.font-light-blue {
+  color: $light-blue;
+}
+.font-white {
+  color: $white;
+}
+// other classes
+.drop {
+  float: left;
+  font-size: 50px;
+  line-height: 1;
+  padding-top: 5px;
+  padding-right: 2px;
+  margin-left: -3px;
+}
+.drop:before,
+.drop:after {
+  content: "";
+  display: block;
+}
+.drop:before {
+  margin-top: -0.2em;
+}
+.drop:after {
+  margin-bottom: -0.3em;
+}
+
+.modal {
+  width: 100vw;
+  height: fit-content;
+  max-height: 100vh;
+  margin: auto;
+}
+.modal * {
+  max-width: 100%;
+}
+
+.modal-dialog {
+  min-width: fit-content !important;
+}
+
+@mixin grid {
+  display: grid;
+  gap: map.get($grid, "gap");
+}
+
+// Section 1 -- greeting
+#greeting {
+  h1 {
+    color: $white !important;
+    font-weight: 800 !important;
+    font-size: map.get($typography, "big-header-font-size") !important;
+    height: calc(100vh - 100px);
+  }
+  #s1Box {
+    display: block;
+    border: map.get($border, "size") solid $white;
+    color: $dark-blue;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    padding: 10px 5px 10px 5px;
+    text-align: center;
+    box-shadow: 5px 5px $aqua;
+    background-color: $light-blue;
+    margin: 0 auto;
+    position: relative;
+    font-size: max(1.5vw, map.get($typography, "base-font-size"));
+    width: max(fit-content, 15vw);
+    margin-bottom: 50px;
+  }
+
+  #s1Box:hover {
+    cursor: pointer;
+    transform: translateY(-2px) translateX(-2px);
+  }
+}
+
+// Section 2 -- about me
+#about {
+  height: fit-content;
+  font-size: 18px;
+
+  #pfpBorder {
+    aspect-ratio: map.get($ratios, "square");
+    overflow: hidden;
+    padding: 15px;
+    background-color: $aqua;
+    background: inear-gradient($light-blue, $aqua, $blue);
+    border-radius: map.get($border, "circle-radius");
+    animation: pfp 8s linear reverse infinite;
+  }
+
+  #pfp {
+    max-width: 100%;
+    aspect-ratio: map.get($ratios, "square");
+    border-radius: map.get($border, "circle-radius");
+    object-fit: cover;
+    animation: pfp 8s linear infinite;
+  }
+
+  #about-text {
+    background-color: $dark-blue;
+    box-shadow: 0px 0px 10px $aqua;
+    border-radius: map.get($border, "default-radius");
+    height: fit-content;
+    max-height: 100%;
+    font-size: map.get($typography, "base-font-size");
+  }
+
+  a {
+    width: fit-content;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border: map.get($border, "size") solid $light-blue;
+    border-radius: map.get($border, "circle-radius");
+    text-decoration: none;
+    text-align: center;
+    border: 2px solid $light-blue;
+  }
+
+  a[href="#toolkit"] {
+    color: $light-blue;
+  }
+
+  a[href="#contact"] {
+    background-color: $light-blue;
+    color: $dark-blue;
+  }
+}
+// Section 3 -- toolkit
+#tools {
+  @include grid;
+
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(max(150px, calc(100% - 20px) / 5), 1fr)
+  );
+
+  .toolItem,
+  .toolItemContainer {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: map.get($ratios, "square");
+    background-color: $blue;
+    border-radius: map.get($border, "default-radius");
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .toolItemFront {
+    height: 80% !important;
+    width: 80% !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+  }
+
+  .toolItemFront img {
+    filter: brightness(0) invert(1);
+    max-height: 100%;
+  }
+
+  .toolItemFront h3 {
+    font-size: map.get($typography, "small-header-font-size");
+  }
+
+  .toolDescription {
+    font-size: map.get($typography, "base-font-size");
+    display: -webkit-box;
+    line-clamp: 5;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .toolItemContainer {
+    perspective: 1000px;
+    background-color: unset !important;
+    aspect-ratio: map.get($ratios, "square");
+  }
+
+  .toolItem {
+    border: map.get($border, "size") solid $light-blue;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 1s;
+    border-radius: map.get($border, "m-radius");
+  }
+
+  .toolItemFront,
+  .toolItemBack {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: $blue;
+    flex-direction: column;
+    border-radius: map.get($border, "m-radius");
+  }
+
+  .toolItemFront {
+    img {
+      height: 80%;
+    }
+  }
+  .toolItemBack {
+    p {
+      margin: 20px;
+    }
+  }
+
+  .toolItemBack {
+    transform: rotateY(180deg);
+  }
+  .toolItemContainer:hover .toolItem {
+    transform: rotateY(180deg);
+  }
+}
+
+// Section 4 -- projects
+#projects {
+  #projectGrid {
+    display: grid;
+    margin-top: 50px !important;
+  }
+  .project {
+    max-height: 100%;
+    position: relative;
+    background-color: $aqua;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0px 0px 10px $aqua;
+  }
+  .project img {
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    min-width: 100%;
+    min-height: 100%;
+    height: 100%;
+    width: 100%;
+  }
+  .project h3 {
+    text-align: center;
+    width: 100%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: $dark-blue;
+  }
+}
+
+// Section 5 -- certificates
+#certificates {
+  #certificateGrid {
+    @include grid;
+    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
+    height: 80%;
+
+    button {
+      height: 100%;
+      background-color: $transparent;
+
+      img {
+        width: fit-content;
+        height: fit-content;
+        max-height: 100%;
+        max-width: 100%;
+      }
+    }
+    button:hover {
+      width: calc(100% + 5px);
+      height: calc(100% + 5px);
+    }
+  }
+}
+
+@media only screen and (orientation: landscape) and (min-width: 700px) and (min-height: 500px) {
+  #about {
+    @include grid;
+    gap: 0px;
+    grid-template-columns: repeat(8, 12.5%);
+    grid-template-rows: repeat(8, 12.5%);
+    height: 100vh !important;
+    align-items: center;
+
+    #pfpBorder {
+      grid-area: 1 / 1 / 9 / 5;
+      margin-left: -33%;
+      max-width: 100%;
+      max-height: 80%;
+      margin-top: 0px;
+      position: relative;
+      bottom: 0px;
+    }
+
+    #pfp {
+      width: 100% !important;
+      width: 100% !important;
+    }
+    h2 {
+      grid-area: 2 / 5 / 2 / 8;
+      width: 100%;
+      margin: 0px;
+    }
+
+    #about-text {
+      grid-area: 3 / 5 / 7 / 9;
+      width: 90%;
+      max-height: 90%;
+      padding: 20px;
+      overflow: auto;
+    }
+
+    #about-text p {
+      height: fit-content;
+      overflow: auto;
+      width: 100%;
+    }
+
+    a[href="#toolkit"] {
+      grid-area: 7 / 5 / 8 / 6;
+      width: 125%;
+      margin-right: -25%;
+    }
+
+    a[href="#contact"] {
+      grid-area: 7 / 8 / 8 / 9;
+      width: 125%;
+      margin-left: -25%;
+      transform: translateX(-25%);
+    }
+  }
+
+  #toolkit {
+    height: fit-content;
+
+    #tools {
+      margin-bottom: 10px;
+      width: 80%;
+      margin: auto;
+      padding: 25px;
+      align-items: center;
+      justify-content: center;
+      justify-items: center;
+    }
+  }
+  #projectGrid {
+    grid-template-columns: repeat(2, 1fr);
+    width: 80%;
+    margin: auto;
+  }
+
+  #contact {
+    @include grid;
+    height: 100vh;
+    width: 100vw;
+    grid-template-columns: repeat(8, calc(12.5% - 20px));
+    grid-template-rows: repeat(8, calc(12.5% - 20px));
+
+    h2 {
+      margin: 0;
+      height: 100%;
+      width: 100%;
+      text-align: left;
+      grid-area: 2 / 2 / 3 / 5;
+      line-height: 70px;
+    }
+
+    #contactMeText {
+      width: 100%;
+      height: 100%;
+      grid-area: 3 / 2 / 5 / 5;
+    }
+    #pc,
+    #pc canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    #pc {
+      grid-area: 5 / 2 / 8 / 5;
+    }
+
+    #contactForm {
+      @include grid;
+      grid-area: 3 / 5 / 9 / 9;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(5, 1fr);
+
+      * {
+        width: 100%;
+        height: 100%;
+        margin: 0px !important;
+      }
+
+      #phone {
+        grid-area: 4 / 1 / 5 / 1;
+      }
+
+      #details {
+        grid-area: 2 / 2 / 5 / 2;
+      }
+
+      #submit {
+        grid-area: 5 / 1 / 6 / 3;
+      }
+    }
+  }
+}
+@media screen and (orientation: portrait),
+  screen and (max-width: 700px),
+  screen and (max-height: 500px) {
+  a:not(.toolItemContainer, .project) {
+    display: none;
+  }
+
+  #about {
+    #pfpBorder {
+      width: 80%;
+      margin: auto;
+      margin-top: 50px;
+    }
+
+    #about-text {
+      width: 80%;
+      margin: auto;
+      margin-top: 50px;
+      margin-bottom: 50px;
+      padding: 20px;
+    }
+  }
+  #projectGrid {
+    width: 80%;
+    margin: auto;
+    grid-template-columns: repeat(1, 1fr);
+    grid-template-rows: 400px;
+    height: 200px;
+    justify-items: center;
+    align-items: center;
+  }
+  #toolkit {
+    #toolsWrapper {
+      width: 80%;
+      margin: auto;
+      height: calc(100vh - 145px);
+      margin-top: 50px;
+      overflow: scroll;
+    }
+    #tools {
+      overflow: auto;
+      min-height: 100%;
+      height: fit-content;
+    }
+
+    .toolItemFront {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-around;
+    }
+    .toolItemFront img {
+      height: calc(100% - 60px);
+    }
+    .toolItemFront h3 {
+      font-size: 20px !important;
+    }
+
+    #contact {
+      height: calc(100% - 50px);
+
+      #contactMeText {
+        display: none;
+      }
+      #contactForm {
+        margin-top: 50px !important;
+        height: calc(100vh - 155px);
+        margin: auto;
+        width: 80%;
+        display: grid;
+        grid-template-rows: repeat(9, 1fr);
+        gap: 10px;
+      }
+    }
+    #certificates {
+      height: fit-content;
+      #certificateGrid {
+        grid-template-columns: repeat(1, 1fr);
+        grid-auto-flow: column !important;
+        grid-template-rows: repeat(2, 1fr);
+      }
+    }
+    #contact {
+      input {
+        margin: 0px;
+        height: 100%;
+      }
+      #details {
+        grid-area: span 3;
+      }
+      #pc {
+        display: none;
+      }
+    }
+  }
+  form {
+    height: 80vh;
+    @include grid;
+    grid-template-rows: repeat(8, 1fr);
+    textarea {
+      grid-row: auto / span 2;
+      width: 100%;
+    }
+  }
+}
+
+@media only screen and (max-height: 650px) {
+  #pc {
+    display: none;
+  }
+}
+
+@media only screen and (max-width: 500px) {
+  #toolkit {
+    #toolsWrapper {
+      #tools {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 1000px) {
+  #pc {
+    display: none;
+  }
+  .toolItemFront img {
+    height: calc(100% - 60px);
+  }
+}

@@ -1,0 +1,57 @@
+[
+  {
+    "name": "HTML 5",
+    "id": "html5",
+    "path": "./assets/logos/html.svg",
+    "link": "",
+    "innerText": "HTML5 (Hypertext Markup Language 5) is a markup language used for structuring and presenting hypertext documents on the World Wide Web."
+  },
+  {
+    "name": "CSS 3",
+    "id": "css3",
+    "path": "./assets/logos/css.svg",
+    "innerText": "CSS, or Cascading Style Sheets, is used to style and layout webpages. It controls the visual appearance of HTML elements, including colors, fonts, spacing, and positioning, making websites look attractive and consistent across different devices."
+  },
+  {
+    "name": "JavaScript",
+    "id": "javascript",
+    "path": "./assets/logos/javascript.svg",
+    "innerText": "JavaScript, often abbreviated as JS, is a programming language and core technology of the Web, alongside HTML and CSS. 99% of websites use JavaScript on the client side for webpage behavior"
+  },
+  {
+    "name": "Python",
+    "id": "python",
+    "path": "./assets/logos/python.svg",
+    "innerText": "Python is a high-level, general-purpose programming language. Its design philosophy emphasizes code readability with the use of significant indentation."
+  },
+  {
+    "name": "React",
+    "id": "react",
+    "path": "./assets/logos/react.png",
+    "innerText": "React (also known as React.js or ReactJS) is a free and open-source front-end JavaScript library for building user interfaces based on components. It is maintained by Meta (formerly Facebook) and a community of individual developers and companies."
+  },
+  {
+    "name": "Django",
+    "id": "django_(web_framework)",
+    "path": "./assets/logos/django.svg",
+    "innerText": "Django is a free and open-source, Python-based web framework that runs on a web server. It follows the model–template–views (MTV) architectural pattern. It is maintained by the Django Software Foundation (DSF), an independent organization established in the US as a non-profit."
+  },
+  {
+    "name": "Flask",
+    "id": "Flask_(web_framework)",
+    "path": "./assets/logos/flask.svg",
+    "innerText": "Flask is a micro web framework written in Python. It is classified as a microframework because it does not require particular tools or libraries."
+  },
+  {
+    "name": "C",
+    "id": "C_(programming_language)",
+    "path": "./assets/logos/c.svg",
+    "innerText": "C is a general-purpose programming language. It was created in the 1970s by Dennis Ritchie and remains very widely used and influential."
+  },
+  {
+    "name": "SQLite",
+    "id": "SQLite",
+    "path": "./assets/logos/sqlite.svg",
+    "innerText": "SQLite is a database engine written in the C programming language. It is not a standalone app; rather, it is a library that software developers embed in their apps."
+  }
+]

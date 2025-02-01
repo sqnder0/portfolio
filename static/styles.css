@@ -1,0 +1,576 @@
+* {
+  color: #f8dad0;
+  margin: 0;
+  padding: 0;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+::placeholder {
+  text-align: center;
+  color: #f8dad0;
+}
+
+::-webkit-input-placeholder {
+  text-align: center;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: fit-content;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  overflow: auto;
+  background-color: #001129;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  background: radial-gradient(circle at 120% 50%, #2d99ae 5%, #0c5776 10%, #001129, #001129 50%), radial-gradient(circle at -20% 75%, #2d99ae 5%, #0c5776 10%, #001129, #001129 50%);
+}
+
+section {
+  background-color: rgba(0, 0, 0, 0);
+  width: 100vw;
+  min-height: calc(100vh - 50px);
+  height: 100vh;
+}
+
+h2 {
+  margin: auto;
+  width: fit-content;
+  margin-top: 50px;
+  font-size: calc(5vw + 2vh) !important;
+}
+
+hr {
+  border-top: 5px dotted #0c5776 !important;
+  width: calc(90vw - 20px);
+  margin: auto !important;
+}
+
+input {
+  display: block;
+  color: #f8dad0;
+  background-color: rgba(0, 0, 0, 0);
+  border: 1px solid #f8dad0;
+  height: 50px;
+  width: 100%;
+  margin-bottom: 5%;
+}
+
+form textarea {
+  color: #f8dad0;
+  background-color: rgba(0, 0, 0, 0);
+  border: 1px solid #f8dad0;
+  display: block;
+  resize: none;
+  min-height: 100%;
+  max-height: 100%;
+}
+
+a {
+  color: #f8dad0;
+  text-decoration: none !important;
+  font-size: 2vw;
+}
+
+.font-dark-blue {
+  color: #001129;
+}
+
+.font-blue {
+  color: #0c5776;
+}
+
+.font-aqua {
+  color: #2d99ae;
+}
+
+.font-light-blue {
+  color: #bcfffe;
+}
+
+.font-white {
+  color: #f8dad0;
+}
+
+.drop {
+  float: left;
+  font-size: 50px;
+  line-height: 1;
+  padding-top: 5px;
+  padding-right: 2px;
+  margin-left: -3px;
+}
+
+.drop:before,
+.drop:after {
+  content: "";
+  display: block;
+}
+
+.drop:before {
+  margin-top: -0.2em;
+}
+
+.drop:after {
+  margin-bottom: -0.3em;
+}
+
+.modal {
+  width: 100vw;
+  height: fit-content;
+  max-height: 100vh;
+  margin: auto;
+}
+
+.modal * {
+  max-width: 100%;
+}
+
+.modal-dialog {
+  min-width: fit-content !important;
+}
+
+#greeting h1 {
+  color: #f8dad0 !important;
+  font-weight: 800 !important;
+  font-size: calc(5.5vw + 5vh) !important;
+  height: calc(100vh - 100px);
+}
+#greeting #s1Box {
+  display: block;
+  border: 2px solid #f8dad0;
+  color: #001129;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 20px;
+  padding: 10px 5px 10px 5px;
+  text-align: center;
+  box-shadow: 5px 5px #2d99ae;
+  background-color: #bcfffe;
+  margin: 0 auto;
+  position: relative;
+  font-size: max(1.5vw, 16px);
+  width: max(fit-content, 15vw);
+  margin-bottom: 50px;
+}
+#greeting #s1Box:hover {
+  cursor: pointer;
+  transform: translateY(-2px) translateX(-2px);
+}
+
+#about {
+  height: fit-content;
+  font-size: 18px;
+}
+#about #pfpBorder {
+  aspect-ratio: 1;
+  overflow: hidden;
+  padding: 15px;
+  background-color: #2d99ae;
+  background: inear-gradient(#bcfffe, #2d99ae, #0c5776);
+  border-radius: 1000px;
+  animation: pfp 8s linear reverse infinite;
+}
+#about #pfp {
+  max-width: 100%;
+  aspect-ratio: 1;
+  border-radius: 1000px;
+  object-fit: cover;
+  animation: pfp 8s linear infinite;
+}
+#about #about-text {
+  background-color: #001129;
+  box-shadow: 0px 0px 10px #2d99ae;
+  border-radius: 20px;
+  height: fit-content;
+  max-height: 100%;
+  font-size: 16px;
+}
+#about a {
+  width: fit-content;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border: 2px solid #bcfffe;
+  border-radius: 1000px;
+  text-decoration: none;
+  text-align: center;
+  border: 2px solid #bcfffe;
+}
+#about a[href="#toolkit"] {
+  color: #bcfffe;
+}
+#about a[href="#contact"] {
+  background-color: #bcfffe;
+  color: #001129;
+}
+
+#tools {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(max(150px, (100% - 20px) / 5), 1fr));
+}
+#tools .toolItem,
+#tools .toolItemContainer {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1;
+  background-color: #0c5776;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#tools .toolItemFront {
+  height: 80% !important;
+  width: 80% !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+#tools .toolItemFront img {
+  filter: brightness(0) invert(1);
+  max-height: 100%;
+}
+#tools .toolItemFront h3 {
+  font-size: calc(1vh + 1vw);
+}
+#tools .toolDescription {
+  font-size: 16px;
+  display: -webkit-box;
+  line-clamp: 5;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#tools .toolItemContainer {
+  perspective: 1000px;
+  background-color: unset !important;
+  aspect-ratio: 1;
+}
+#tools .toolItem {
+  border: 2px solid #bcfffe;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 1s;
+  border-radius: 50px;
+}
+#tools .toolItemFront,
+#tools .toolItemBack {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #0c5776;
+  flex-direction: column;
+  border-radius: 50px;
+}
+#tools .toolItemFront img {
+  height: 80%;
+}
+#tools .toolItemBack p {
+  margin: 20px;
+}
+#tools .toolItemBack {
+  transform: rotateY(180deg);
+}
+#tools .toolItemContainer:hover .toolItem {
+  transform: rotateY(180deg);
+}
+
+#projects #projectGrid {
+  display: grid;
+  margin-top: 50px !important;
+}
+#projects .project {
+  max-height: 100%;
+  position: relative;
+  background-color: #2d99ae;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0px 0px 10px #2d99ae;
+}
+#projects .project img {
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  min-width: 100%;
+  min-height: 100%;
+  height: 100%;
+  width: 100%;
+}
+#projects .project h3 {
+  text-align: center;
+  width: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #001129;
+}
+
+#certificates #certificateGrid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(2, 1fr);
+  width: 100%;
+  height: 80%;
+}
+#certificates #certificateGrid button {
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0);
+}
+#certificates #certificateGrid button img {
+  width: fit-content;
+  height: fit-content;
+  max-height: 100%;
+  max-width: 100%;
+}
+#certificates #certificateGrid button:hover {
+  width: calc(100% + 5px);
+  height: calc(100% + 5px);
+}
+
+@media only screen and (orientation: landscape) and (min-width: 700px) and (min-height: 500px) {
+  #about {
+    display: grid;
+    gap: 20px;
+    gap: 0px;
+    grid-template-columns: repeat(8, 12.5%);
+    grid-template-rows: repeat(8, 12.5%);
+    height: 100vh !important;
+    align-items: center;
+  }
+  #about #pfpBorder {
+    grid-area: 1/1/9/5;
+    margin-left: -33%;
+    max-width: 100%;
+    max-height: 80%;
+    margin-top: 0px;
+    position: relative;
+    bottom: 0px;
+  }
+  #about #pfp {
+    width: 100% !important;
+    width: 100% !important;
+  }
+  #about h2 {
+    grid-area: 2/5/2/8;
+    width: 100%;
+    margin: 0px;
+  }
+  #about #about-text {
+    grid-area: 3/5/7/9;
+    width: 90%;
+    max-height: 90%;
+    padding: 20px;
+    overflow: auto;
+  }
+  #about #about-text p {
+    height: fit-content;
+    overflow: auto;
+    width: 100%;
+  }
+  #about a[href="#toolkit"] {
+    grid-area: 7/5/8/6;
+    width: 125%;
+    margin-right: -25%;
+  }
+  #about a[href="#contact"] {
+    grid-area: 7/8/8/9;
+    width: 125%;
+    margin-left: -25%;
+    transform: translateX(-25%);
+  }
+  #toolkit {
+    height: fit-content;
+  }
+  #toolkit #tools {
+    margin-bottom: 10px;
+    width: 80%;
+    margin: auto;
+    padding: 25px;
+    align-items: center;
+    justify-content: center;
+    justify-items: center;
+  }
+  #projectGrid {
+    grid-template-columns: repeat(2, 1fr);
+    width: 80%;
+    margin: auto;
+  }
+  #contact {
+    display: grid;
+    gap: 20px;
+    height: 100vh;
+    width: 100vw;
+    grid-template-columns: repeat(8, calc(12.5% - 20px));
+    grid-template-rows: repeat(8, calc(12.5% - 20px));
+  }
+  #contact h2 {
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    text-align: left;
+    grid-area: 2/2/3/5;
+    line-height: 70px;
+  }
+  #contact #contactMeText {
+    width: 100%;
+    height: 100%;
+    grid-area: 3/2/5/5;
+  }
+  #contact #pc,
+  #contact #pc canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  #contact #pc {
+    grid-area: 5/2/8/5;
+  }
+  #contact #contactForm {
+    display: grid;
+    gap: 20px;
+    grid-area: 3/5/9/9;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+  }
+  #contact #contactForm * {
+    width: 100%;
+    height: 100%;
+    margin: 0px !important;
+  }
+  #contact #contactForm #phone {
+    grid-area: 4/1/5/1;
+  }
+  #contact #contactForm #details {
+    grid-area: 2/2/5/2;
+  }
+  #contact #contactForm #submit {
+    grid-area: 5/1/6/3;
+  }
+}
+@media screen and (orientation: portrait), screen and (max-width: 700px), screen and (max-height: 500px) {
+  a:not(.toolItemContainer, .project) {
+    display: none;
+  }
+  #about #pfpBorder {
+    width: 80%;
+    margin: auto;
+    margin-top: 50px;
+  }
+  #about #about-text {
+    width: 80%;
+    margin: auto;
+    margin-top: 50px;
+    margin-bottom: 50px;
+    padding: 20px;
+  }
+  #projectGrid {
+    width: 80%;
+    margin: auto;
+    grid-template-columns: repeat(1, 1fr);
+    grid-template-rows: 400px;
+    height: 200px;
+    justify-items: center;
+    align-items: center;
+  }
+  #toolkit #toolsWrapper {
+    width: 80%;
+    margin: auto;
+    height: calc(100vh - 145px);
+    margin-top: 50px;
+    overflow: scroll;
+  }
+  #toolkit #tools {
+    overflow: auto;
+    min-height: 100%;
+    height: fit-content;
+  }
+  #toolkit .toolItemFront {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+  }
+  #toolkit .toolItemFront img {
+    height: calc(100% - 60px);
+  }
+  #toolkit .toolItemFront h3 {
+    font-size: 20px !important;
+  }
+  #toolkit #contact {
+    height: calc(100% - 50px);
+  }
+  #toolkit #contact #contactMeText {
+    display: none;
+  }
+  #toolkit #contact #contactForm {
+    margin-top: 50px !important;
+    height: calc(100vh - 155px);
+    margin: auto;
+    width: 80%;
+    display: grid;
+    grid-template-rows: repeat(9, 1fr);
+    gap: 10px;
+  }
+  #toolkit #certificates {
+    height: fit-content;
+  }
+  #toolkit #certificates #certificateGrid {
+    grid-template-columns: repeat(1, 1fr);
+    grid-auto-flow: column !important;
+    grid-template-rows: repeat(2, 1fr);
+  }
+  #toolkit #contact input {
+    margin: 0px;
+    height: 100%;
+  }
+  #toolkit #contact #details {
+    grid-area: span 3;
+  }
+  #toolkit #contact #pc {
+    display: none;
+  }
+  form {
+    height: 80vh;
+    display: grid;
+    gap: 20px;
+    grid-template-rows: repeat(8, 1fr);
+  }
+  form textarea {
+    grid-row: auto/span 2;
+    width: 100%;
+  }
+}
+@media only screen and (max-height: 650px) {
+  #pc {
+    display: none;
+  }
+}
+@media only screen and (max-width: 500px) {
+  #toolkit #toolsWrapper #tools {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media only screen and (max-width: 1000px) {
+  #pc {
+    display: none;
+  }
+  .toolItemFront img {
+    height: calc(100% - 60px);
+  }
+}
+
+/*# sourceMappingURL=styles.css.map */
