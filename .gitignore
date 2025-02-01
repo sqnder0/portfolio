@@ -3,3 +3,4 @@ venv/
 linux/
 bootstrap/bootstrap/
 bootstrap/
+.env
