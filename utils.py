@@ -34,18 +34,28 @@ class Email:
         self.text = text
         
 class Email:
-    def __init__(self, text, receiver):
+    def __init__(self, subject, body, receiver):
+        self.sender = "pelgrimssander17@gmail.com"
         self.receiver = receiver
-        self.text = text
+        self.subject = subject
+        self.body = body
+        
         
     def send(self):
-        try:
-            context = ssl.create_default_context()
-            env = dotenv_values()
-            password = env["password"]
-            
-            with smtplib.SMTP_SSL("smtp-mail.outlook.com", 465, context=context, timeout=10) as server:
-                server.login("sander_pelgrims@outlook.com", password)
-                server.sendmail(self.sender, self.receiver, self.text)
+        try:    
+                config = dotenv_values(".env")
+                self.password = config.get("password")
+                message = f"""from: <Sander>{self.sender}
+To: {self.receiver}
+Subject: {self.subject}\n
+{self.body}
+                """
+                
+                server = smtplib.SMTP("smtp.gmail.com", 587)
+                server.starttls()
+                server.login(self.sender, self.password)
+                
+                server.sendmail(self.sender, self.receiver, message)
+                server.quit()
         except Exception as e:
             print(f"Failed to send email: {e}")
