@@ -1,6 +1,7 @@
 import sqlite3
 import smtplib, ssl
 from dotenv import dotenv_values
+import wikipedia
 
 class Database:
     def __init__(self, path):
@@ -59,3 +60,12 @@ Subject: {self.subject}\n
                 server.quit()
         except Exception as e:
             print(f"Failed to send email: {e}")
+
+def get_cards():
+    db = Database("portfolio.db")
+    
+    cards = db.execute("SELECT * FROM tools;")
+    for card in cards:
+        card["innerText"] = wikipedia.summary(card["wiki"], sentences=2)
+    
+    return cards

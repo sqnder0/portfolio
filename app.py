@@ -1,6 +1,6 @@
 from flask import Flask, render_template
 from flask import request
-from utils import Database, Email
+from utils import Database, Email, get_cards
 import wikipedia
 
 app = Flask(__name__, static_url_path="", static_folder='static')
@@ -34,11 +34,7 @@ def index():
             mail = Email(subject="Hey Sander, someone used the form on your website!", receiver="sander_pelgrims@outlook.com", body=message)
             mail.send()
             
-            cards = db.execute("SELECT * FROM tools;")
-            for card in cards:
-                card["innerText"] = wikipedia.summary(card["wiki"], sentences=2)
-                
-            return render_template("index.html", cards=cards, message="We received your contact information")
+            return render_template("index.html", cards=get_cards(), message="We received your contact information")
             
         except Exception as e:
             print(e)
@@ -46,12 +42,7 @@ def index():
                 "code": 422,
                 "description": "Unprocessable Entity, invalid form data"
             }
-            cards = db.execute("SELECT * FROM tools;")
-            for card in cards:
-                card["innerText"] = wikipedia.summary(card["wiki"], sentences=2)
-            return render_template("index.html", cards=cards, message="422 Unprocessable Entity, invalid form data")
+
+            return render_template("index.html", cards=get_cards(), message="422 Unprocessable Entity, invalid form data")
         
-    cards = db.execute("SELECT * FROM tools;")
-    for card in cards:
-        card["innerText"] = wikipedia.summary(card["wiki"], sentences=2)
-    return render_template("index.html", cards=cards)
+    return render_template("index.html", cards=get_cards())
