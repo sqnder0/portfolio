@@ -121,6 +121,8 @@ Fix checklist:
 2. Redeploy.
 3. If you prefer Docker instead of Nixpacks, switch Dokploy build mode to Dockerfile/Compose for this app.
 
+If logs show `externally-managed-environment` (PEP 668), Nixpacks must install Python dependencies in a virtual environment. This is already configured in [nixpacks.toml](nixpacks.toml) using `/opt/venv/bin/pip` and `/opt/venv/bin/gunicorn`.
+
 ## Smoke test checklist
 
 1. Homepage loads and tool cards render.
