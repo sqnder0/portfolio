@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "start": "gunicorn --bind 0.0.0.0:${PORT:-5000} app:app",
     "build:css": "sass static/scss/styles.scss static/styles.css --style=compressed",
     "watch:css": "sass --watch static/scss:static"
   },

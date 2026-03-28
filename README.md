@@ -109,6 +109,18 @@ Fix checklist:
 4. If Dokploy asks for image variable, set `APP_IMAGE=portfolio-web:latest`.
 5. Re-run deployment and verify [health endpoint](README.md#health-check).
 
+### Common Nixpacks start error
+
+If Dokploy logs show `No start command could be found`, Dokploy is building with Nixpacks instead of Docker.
+
+This repository now includes [nixpacks.toml](nixpacks.toml) and a `start` script in [package.json](package.json), so Nixpacks can run Flask with Gunicorn.
+
+Fix checklist:
+
+1. Pull latest code on Dokploy (must include `nixpacks.toml`).
+2. Redeploy.
+3. If you prefer Docker instead of Nixpacks, switch Dokploy build mode to Dockerfile/Compose for this app.
+
 ## Smoke test checklist
 
 1. Homepage loads and tool cards render.

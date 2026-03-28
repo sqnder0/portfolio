@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["python312", "python312Packages.pip", "nodejs_18", "npm-9_x"]
+
+[phases.install]
+cmds = ["pip install -r requirements.txt", "npm ci"]
+
+[phases.build]
+cmds = ["npm run build:css"]
+
+[start]
+cmd = "gunicorn --bind 0.0.0.0:${PORT:-5000} app:app"
