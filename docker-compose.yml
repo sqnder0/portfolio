@@ -1,0 +1,19 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: portfolio-web
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    environment:
+      FLASK_ENV: production
+      DATABASE_PATH: /app/data/portfolio.db
+    volumes:
+      - portfolio_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  portfolio_data:
