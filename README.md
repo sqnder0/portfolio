@@ -77,6 +77,26 @@ This repo includes a Dockerfile that starts the app with Gunicorn.
 curl https://your-domain/health
 ```
 
+## Docker Compose
+
+Use compose for local containerized runs:
+
+```bash
+docker compose up --build -d
+```
+
+Stop the stack:
+
+```bash
+docker compose down
+```
+
+Inspect logs:
+
+```bash
+docker compose logs -f web
+```
+
 ## Smoke test checklist
 
 1. Homepage loads and tool cards render.
