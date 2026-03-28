@@ -69,6 +69,30 @@ document.body.addEventListener("wheel", (event) => {
 
 const h1 = document.getElementsByTagName("h1")[0];
 
+const airplaneIcon = document.querySelector("#pc i");
+if (airplaneIcon) {
+  let mouseX = 0, mouseY = 0;
+  let rafPending = false;
+
+  function updateAirplane() {
+    const rect = airplaneIcon.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const angle = Math.atan2(mouseY - centerY, mouseX - centerX) * (180 / Math.PI);
+    airplaneIcon.style.transform = `rotate(${angle + 45}deg)`;
+    rafPending = false;
+  }
+
+  document.addEventListener("mousemove", (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    if (!rafPending) {
+      rafPending = true;
+      requestAnimationFrame(updateAirplane);
+    }
+  });
+}
+
 function fitText(element) {
   const height = element.offsetHeight;
   let fontSize = parseFloat(

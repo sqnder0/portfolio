@@ -1,6 +1,10 @@
 __pycache__/
 venv/
+env/
 linux/
 bootstrap/bootstrap/
 bootstrap/
 .env
+node_modules/
+.pytest_cache/
+tools_cache.json

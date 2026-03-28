@@ -20,7 +20,7 @@ $transparent: map.get($colors, "transparent");
 
 // Typography
 $typography: (
-  "base-font-size": 16px,
+  "base-font-size": 20px,
   "small-header-font-size": calc(1vh + 1vw),
   "header-font-size": calc(5vw + 2vh),
   "big-header-font-size": calc(5.5vw + 5vh),
@@ -121,19 +121,23 @@ input {
   color: $white;
   background-color: $transparent;
   border: 1px solid $white;
+  border-radius: map.get($border, "default-radius");
   height: 50px;
   width: 100%;
   margin-bottom: 5%;
+  padding: 0 12px;
 }
 
 form textarea {
   color: $white;
   background-color: $transparent;
   border: 1px solid $white;
+  border-radius: map.get($border, "default-radius");
   display: block;
   resize: none;
   min-height: 100%;
   max-height: 100%;
+  padding: 12px;
 }
 
 a {
@@ -193,6 +197,35 @@ a {
   min-width: fit-content !important;
 }
 
+.modal-content {
+  background-color: $dark-blue;
+  border: 1px solid $blue;
+  border-radius: map.get($border, "default-radius");
+  box-shadow: 0px 0px 20px $aqua;
+
+  img {
+    border-radius: map.get($border, "default-radius");
+    width: 100%;
+  }
+}
+
+.modal-header {
+  background-color: $dark-blue;
+  border-bottom: 1px solid $blue;
+
+  .modal-title {
+    color: $light-blue;
+  }
+
+  .btn-close {
+    filter: invert(1);
+  }
+}
+
+.modal-body {
+  padding: map.get($grid, "gap");
+}
+
 @mixin grid {
   display: grid;
   gap: map.get($grid, "gap");
@@ -239,7 +272,7 @@ a {
     overflow: hidden;
     padding: 15px;
     background-color: $aqua;
-    background: inear-gradient($light-blue, $aqua, $blue);
+    background: linear-gradient($light-blue, $aqua, $blue);
     border-radius: map.get($border, "circle-radius");
     animation: pfp 8s linear reverse infinite;
   }
@@ -263,6 +296,7 @@ a {
 
   a {
     width: fit-content;
+    white-space: nowrap;
     padding-top: 10px;
     padding-bottom: 10px;
     border: map.get($border, "size") solid $light-blue;
@@ -270,6 +304,7 @@ a {
     text-decoration: none;
     text-align: center;
     border: 2px solid $light-blue;
+    font-size: min(40px, 2vw);
   }
 
   a[href="#toolkit"] {
@@ -436,6 +471,23 @@ a {
   }
 }
 
+// Section 6 -- contact me
+#pc {
+  grid-area: 5 / 2 / 8 / 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  i {
+    font-size: clamp(80px, 15vw, 250px);
+    color: $light-blue;
+    opacity: 0.75;
+    transform: rotate(45deg);
+    transition: transform 0.1s ease-out;
+  }
+}
+
 @media only screen and (orientation: landscape) and (min-width: 700px) and (min-height: 500px) {
   #about {
     @include grid;
@@ -481,13 +533,13 @@ a {
 
     a[href="#toolkit"] {
       grid-area: 7 / 5 / 8 / 6;
-      width: 125%;
+      width: 150%;
       margin-right: -25%;
     }
 
     a[href="#contact"] {
       grid-area: 7 / 8 / 8 / 9;
-      width: 125%;
+      width: 150%;
       margin-left: -25%;
       transform: translateX(-25%);
     }
@@ -533,15 +585,6 @@ a {
       height: 100%;
       grid-area: 3 / 2 / 5 / 5;
     }
-    #pc,
-    #pc canvas {
-      width: 100% !important;
-      height: 100% !important;
-    }
-
-    #pc {
-      grid-area: 5 / 2 / 8 / 5;
-    }
 
     #contactForm {
       @include grid;
@@ -553,6 +596,7 @@ a {
         width: 100%;
         height: 100%;
         margin: 0px !important;
+        font-size: clamp(12px, calc(0.6vw + 0.6vh), 20px);
       }
 
       #phone {
@@ -659,9 +703,6 @@ a {
       #details {
         grid-area: span 3;
       }
-      #pc {
-        display: none;
-      }
     }
   }
   form {
@@ -672,12 +713,6 @@ a {
       grid-row: auto / span 2;
       width: 100%;
     }
-  }
-}
-
-@media only screen and (max-height: 650px) {
-  #pc {
-    display: none;
   }
 }
 
@@ -692,10 +727,26 @@ a {
 }
 
 @media only screen and (max-width: 1000px) {
-  #pc {
-    display: none;
-  }
   .toolItemFront img {
     height: calc(100% - 60px);
+  }
+}
+
+@media only screen and (min-width: 1140px) {
+  .container-fluid-xl {
+    margin-top: 2vh;
+    margin-left: 3vw !important;
+    margin-right: 3vw !important;
+    width: 94vw !important;
+    max-width: 94vw !important;
+  }
+}
+
+@keyframes pfp {
+  from {
+    rotate: 0deg;
+  }
+  to {
+    rotate: 360deg;
   }
 }

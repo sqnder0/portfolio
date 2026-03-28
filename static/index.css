@@ -61,6 +61,7 @@ section {
   font-weight: 800 !important;
   font-size: calc(5.5vw + 5vh) !important;
   height: calc(100vh - 100px);
+  overflow: hidden;
 }
 h2 {
   margin: auto;
@@ -143,6 +144,23 @@ a {
 
 .modal-dialog {
   min-width: fit-content !important;
+}
+
+.modal-content {
+  background-color: var(--dark-blue);
+  border: 1px solid var(--blue);
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--blue);
+}
+
+.modal-header .btn-close {
+  filter: invert(1);
+}
+
+.modal-title {
+  color: var(--light-blue) !important;
 }
 /* Section 1 -- Greeting */
 #s1Box {
@@ -337,9 +355,8 @@ a {
     width: 100%;
   }
   a[href="#toolkit"] {
-    grid-area: 7 / 5 / 8 / 6;
-    width: 125%;
-    margin-right: -25%;
+    grid-area: 7 / 5 / 8 / 7;
+    width: 100%;
     text-align: center;
     border: 2px solid var(--light-blue);
     border-radius: 50px;
@@ -347,21 +364,26 @@ a {
     padding-top: 10px;
     padding-bottom: 10px;
     color: var(--light-blue);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   a[href="#contact"] {
-    grid-area: 7 / 8 / 8 / 9;
-    width: fit-content;
+    grid-area: 7 / 7 / 8 / 9;
+    width: 100%;
     border: 2px solid var(--light-blue);
     background-color: var(--light-blue);
     border-radius: 50px;
     text-decoration: none;
-    width: 125%;
-    margin-left: -25%;
     text-align: center;
     padding-top: 10px;
     padding-bottom: 10px;
     color: var(--dark-blue);
-    transform: translateX(-25%);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   #toolkit {
     height: fit-content;
@@ -445,6 +467,7 @@ a {
   }
   #pc {
     grid-area: 5 / 2 / 8 / 5;
+    overflow: hidden;
   }
   #contactForm {
     grid-area: 3 / 5 / 9 / 9;

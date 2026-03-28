@@ -21,6 +21,12 @@
       crossorigin="anonymous"
     />
 
+    <!-- Bootstrap Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+
     <!-- threeJS -->
     <script type="importmap">
       {
@@ -34,7 +40,7 @@
   <body>
     <section
       id="greeting"
-      class="container-md d-flex flex-column justify-content-between align-items-center"
+      class="container-md container-fluid-xl d-flex flex-column justify-content-between align-items-center"
     >
       <h1 class="text-break">
         <span id="greetingSpan">hi</span>, I'm
@@ -215,8 +221,9 @@
         I can. Looking forward to hearing from you and potentially working
         together to bring your idea to life!
       </p>
-      <div id="pc"></div>
-      <form id="contactForm" method="post">
+      <div id="pc"><i class="bi bi-send"></i></div>
+      <form id="contactForm" method="post" action="/contact">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         <input
           type="text"
           id="fname"
@@ -260,7 +267,6 @@
       </form>
     </section>
     <script src="./index.js" type="module"></script>
-    <script src="./3dModels.js" type="module"></script>
 
     <!-- Bootstrap -->
     <script
@@ -271,6 +277,11 @@
     {% if error %}
     <script>
       window.alert("{{error['code']}} {{error['description']}}");
+    </script>
+    {% endif %}
+    {% if message %}
+    <script>
+      window.alert("{{message}}");
     </script>
     {% endif %}
   </body>
