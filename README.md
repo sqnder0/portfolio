@@ -97,6 +97,18 @@ Inspect logs:
 docker compose logs -f web
 ```
 
+### Common Dokploy image error
+
+If Dokploy shows `No such image: ...:latest`, it is usually trying to start a container before a successful build was produced.
+
+Fix checklist:
+
+1. In Dokploy, ensure deployment type is Compose/Repository build (not prebuilt image only).
+2. Redeploy with build enabled and no cached failed deployment.
+3. Confirm service name is `web` (from [docker-compose.yml](docker-compose.yml)).
+4. If Dokploy asks for image variable, set `APP_IMAGE=portfolio-web:latest`.
+5. Re-run deployment and verify [health endpoint](README.md#health-check).
+
 ## Smoke test checklist
 
 1. Homepage loads and tool cards render.

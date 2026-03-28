@@ -1,5 +1,6 @@
 services:
   web:
+    image: ${APP_IMAGE:-portfolio-web:latest}
     build:
       context: .
       dockerfile: Dockerfile
