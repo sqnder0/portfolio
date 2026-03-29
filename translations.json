@@ -1,0 +1,149 @@
+{
+  "en": {
+    "language": "English",
+    "language_code": "en",
+    "email": {
+      "user_confirmation": {
+        "subject": "We received your submission",
+        "header_title": "Thank you for reaching out!",
+        "header_subtitle": "Your message has been received",
+        "greeting": "Hey {{ first_name }}!",
+        "intro_text": "Thanks for getting in touch. We've received your details and will review them shortly. Here's what we have on file:",
+        "details_label": "YOUR INFORMATION",
+        "name_label": "Name",
+        "email_label": "Email",
+        "company_label": "Company",
+        "phone_label": "Phone",
+        "message_intro": "Your message",
+        "closing_text": "We appreciate your interest and will get back to you as soon as possible. In the meantime, feel free to explore more of our work on our website.",
+        "cta_button": "Visit Our Website",
+        "best_regards": "Best regards",
+        "footer_text": "This is an automated message. Please don't reply to this email directly.",
+        "visit_website": "Visit Website",
+        "contact_us": "Contact Us"
+      },
+      "owner_notification": {
+        "subject": "New portfolio contact form submission",
+        "header_title": "New Contact Submission",
+        "header_subtitle": "A new inquiry has been received",
+        "greeting": "You have a new contact form submission!",
+        "intro_text": "Someone has filled out your portfolio contact form with the following details:",
+        "alert_message": "⚠️ New submission - Review and respond promptly to maintain professional service.",
+        "name_label": "Name",
+        "email_label": "Email Address",
+        "company_label": "Company",
+        "phone_label": "Phone Number",
+        "message_label": "MESSAGE",
+        "action_text": "Click the button below to reply directly:",
+        "reply_button": "Reply to Inquiry",
+        "submitted_at": "Submitted at",
+        "footer_text": "Manage your portfolio contact settings from your dashboard."
+      }
+    },
+    "ui": {
+      "language_selector": "Language",
+      "select_language": "Select Language",
+      "english": "English",
+      "dutch": "Nederlands",
+      "french": "Français"
+    }
+  },
+  "nl": {
+    "language": "Nederlands",
+    "language_code": "nl",
+    "email": {
+      "user_confirmation": {
+        "subject": "We hebben uw inzending ontvangen",
+        "header_title": "Bedankt dat u contact opneemt!",
+        "header_subtitle": "Uw bericht is ontvangen",
+        "greeting": "Hoi {{ first_name }}!",
+        "intro_text": "Dank je wel dat je contact met ons opneemt. We hebben je gegevens ontvangen en zullen deze binnenkort beoordelen. Dit hebben we in ons bestand:",
+        "details_label": "UW GEGEVENS",
+        "name_label": "Naam",
+        "email_label": "E-mailadres",
+        "company_label": "Bedrijf",
+        "phone_label": "Telefoonnummer",
+        "message_intro": "Uw bericht",
+        "closing_text": "We waarderen je interesse en zullen zo snel mogelijk contact met je opnemen. Voel je vrij om meer van ons werk op onze website te verkennen.",
+        "cta_button": "Bezoek onze website",
+        "best_regards": "Met vriendelijke groet",
+        "footer_text": "Dit is een automatisch bericht. Reageer alstublieft niet direct op deze e-mail.",
+        "visit_website": "Website bezoeken",
+        "contact_us": "Contact opnemen"
+      },
+      "owner_notification": {
+        "subject": "Nieuw contactformulier portfolio inzending",
+        "header_title": "Nieuwe contactinzending",
+        "header_subtitle": "Er is een nieuw verzoek ontvangen",
+        "greeting": "Je hebt een nieuwe contactformulierinzending!",
+        "intro_text": "Iemand heeft je portfoliocontactformulier ingevuld met de volgende gegevens:",
+        "alert_message": "⚠️ Nieuwe inzending - Controleer en reageer snel om professionele service te behouden.",
+        "name_label": "Naam",
+        "email_label": "E-mailadres",
+        "company_label": "Bedrijf",
+        "phone_label": "Telefoonnummer",
+        "message_label": "BERICHT",
+        "action_text": "Klik op de knop hieronder om direct te antwoorden:",
+        "reply_button": "Antwoord op verzoek",
+        "submitted_at": "Ingediend op",
+        "footer_text": "Beheer uw portfoliocontactinstellingen via uw dashboard."
+      }
+    },
+    "ui": {
+      "language_selector": "Taal",
+      "select_language": "Selecteer taal",
+      "english": "English",
+      "dutch": "Nederlands",
+      "french": "Français"
+    }
+  },
+  "fr": {
+    "language": "Français",
+    "language_code": "fr",
+    "email": {
+      "user_confirmation": {
+        "subject": "Nous avons reçu votre soumission",
+        "header_title": "Merci de nous avoir contactés !",
+        "header_subtitle": "Votre message a été reçu",
+        "greeting": "Bonjour {{ first_name }} !",
+        "intro_text": "Merci de nous avoir contactés. Nous avons reçu vos coordonnées et les examinerons très bientôt. Voici ce que nous avons en dossier :",
+        "details_label": "VOS COORDONNÉES",
+        "name_label": "Nom",
+        "email_label": "Adresse e-mail",
+        "company_label": "Entreprise",
+        "phone_label": "Numéro de téléphone",
+        "message_intro": "Votre message",
+        "closing_text": "Nous apprécions votre intérêt et vous recontacterons dès que possible. N'hésitez pas à explorer davantage nos travaux sur notre site web.",
+        "cta_button": "Visitez notre site web",
+        "best_regards": "Cordialement",
+        "footer_text": "Ceci est un message automatisé. Veuillez ne pas répondre directement à cet e-mail.",
+        "visit_website": "Visiter le site",
+        "contact_us": "Nous contacter"
+      },
+      "owner_notification": {
+        "subject": "Nouvelle soumission de formulaire de contact de portefeuille",
+        "header_title": "Nouvelle soumission de contact",
+        "header_subtitle": "Une nouvelle demande a été reçue",
+        "greeting": "Vous avez une nouvelle soumission de formulaire de contact !",
+        "intro_text": "Quelqu'un a rempli votre formulaire de contact de portefeuille avec les détails suivants :",
+        "alert_message": "⚠️ Nouvelle soumission - Examinez et répondez rapidement pour maintenir un service professionnel.",
+        "name_label": "Nom",
+        "email_label": "Adresse e-mail",
+        "company_label": "Entreprise",
+        "phone_label": "Numéro de téléphone",
+        "message_label": "MESSAGE",
+        "action_text": "Cliquez sur le bouton ci-dessous pour répondre directement :",
+        "reply_button": "Répondre à la demande",
+        "submitted_at": "Soumis le",
+        "footer_text": "Gérez les paramètres de contact de votre portefeuille à partir de votre tableau de bord."
+      }
+    },
+    "ui": {
+      "language_selector": "Langue",
+      "select_language": "Sélectionner la langue",
+      "english": "English",
+      "dutch": "Nederlands",
+      "french": "Français"
+    }
+  }
+}

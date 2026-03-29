@@ -1,60 +1,78 @@
 # portfolio
 
-### description:
-These are the source files for my personal portfolio site.
+Personal portfolio site (Flask backend + static frontend) with v2 as the default homepage.
 
-### Technical details
-**Frontend:** html, css, sass, js\
-**Backend:** Flask, SQLite3
+## Stack
 
-## Local development
+- Backend: Flask
+- Frontend: HTML, CSS/SCSS, JavaScript
+- Runtime server: Gunicorn
+- Build/deploy target: Nixpacks
 
-1. Create and activate your virtual environment.
-2. Install dependencies:
+## Local Development
+
+1. Create and activate virtual environment.
+2. Install Python dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Create env file from template:
+3. Install frontend dependencies:
+
+```bash
+npm ci
+```
+
+4. Create local env file:
 
 ```bash
 cp .env.example .env
 ```
 
-4. Start app:
+5. Build CSS:
+
+```bash
+npm run build:css
+```
+
+6. Run app:
 
 ```bash
 python app.py
 ```
 
-5. Optional CSS rebuild:
+## Nixpacks Deployment
+
+This repo includes `nixpacks.toml` with build/start commands.
+
+Required environment variables:
+
+- `FLASK_ENV=production`
+- `SECRET_KEY`
+- `DATABASE_PATH`
+- `OWNER_EMAIL`
+- `WEBSITE_URL`
+- `RESEND_FROM_EMAIL`
+- `RESEND_API_KEY`
+- `TOOLS_CACHE_TTL`
+
+Optional:
+
+- `SMTP_SENDER` (fallback sender value)
+
+Start command (from Nixpacks):
 
 ```bash
-npm install
-npm run build:css
+/opt/venv/bin/gunicorn --bind 0.0.0.0:${PORT:-5000} app:app
 ```
 
-## Production configuration
+## Health Check
 
-Set these environment variables in production:
-
-- SECRET_KEY
-- FLASK_ENV=production
-- DATABASE_PATH
-- OWNER_EMAIL
-- SMTP_HOST
-- SMTP_PORT
-- SMTP_SENDER
-- SMTP_PASSWORD
-- TOOLS_CACHE_TTL
-
-## Health check
-
-Use the health endpoint for runtime checks:
+Endpoint:
 
 ```bash
-curl http://localhost:5000/health
+GET /health
 ```
 
 Expected response:
@@ -63,73 +81,14 @@ Expected response:
 {"status":"ok"}
 ```
 
-## Dockploy deployment
+## Email Deliverability Notes
 
-This repo includes a Dockerfile that starts the app with Gunicorn.
+For reliable inbox placement, verify SPF, DKIM, and DMARC for the sending domain used in `RESEND_FROM_EMAIL`.
 
-1. Create a new app in Dockploy from this repository.
-2. Set build context to project root.
-3. Expose container port 5000.
-4. Add required environment variables from the list above.
-5. Deploy and verify:
+## Smoke Test Checklist
 
-```bash
-curl https://your-domain/health
-```
-
-## Docker Compose
-
-Use compose for local containerized runs:
-
-```bash
-docker compose up --build -d
-```
-
-Stop the stack:
-
-```bash
-docker compose down
-```
-
-Inspect logs:
-
-```bash
-docker compose logs -f web
-```
-
-### Common Dokploy image error
-
-If Dokploy shows `No such image: ...:latest`, it is usually trying to start a container before a successful build was produced.
-
-Fix checklist:
-
-1. In Dokploy, ensure deployment type is Compose/Repository build (not prebuilt image only).
-2. Redeploy with build enabled and no cached failed deployment.
-3. Confirm service name is `web` (from [docker-compose.yml](docker-compose.yml)).
-4. If Dokploy asks for image variable, set `APP_IMAGE=portfolio-web:latest`.
-5. Re-run deployment and verify [health endpoint](README.md#health-check).
-
-### Common Nixpacks start error
-
-If Dokploy logs show `No start command could be found`, Dokploy is building with Nixpacks instead of Docker.
-
-This repository now includes [nixpacks.toml](nixpacks.toml) and a `start` script in [package.json](package.json), so Nixpacks can run Flask with Gunicorn.
-
-Fix checklist:
-
-1. Pull latest code on Dokploy (must include `nixpacks.toml`).
-2. Redeploy.
-3. If you prefer Docker instead of Nixpacks, switch Dokploy build mode to Dockerfile/Compose for this app.
-
-If logs show `externally-managed-environment` (PEP 668), Nixpacks must install Python dependencies in a virtual environment. This is already configured in [nixpacks.toml](nixpacks.toml) using `/opt/venv/bin/pip` and `/opt/venv/bin/gunicorn`.
-
-## Smoke test checklist
-
-1. Homepage loads and tool cards render.
-2. Invalid contact email returns validation error.
-3. Valid contact submission returns success message.
-4. App logs do not show unhandled exceptions.
-
-
-
- 
+1. Home (`/`) loads correctly.
+2. Language switcher works on the homepage.
+3. Contact form rejects invalid email input.
+4. Contact form sends user + owner email on valid input.
+5. Health endpoint returns HTTP 200.

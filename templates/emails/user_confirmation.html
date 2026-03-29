@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ subject }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #001129 0%, #0c5776 100%);
+            padding: 40px 20px;
+            text-align: center;
+            color: #bcfffe;
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .content h2 {
+            color: #001129;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        .content p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            color: #555;
+        }
+        .details-box {
+            background-color: #f9f9f9;
+            border-left: 4px solid #2d99ae;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 4px;
+        }
+        .details-box h3 {
+            color: #2d99ae;
+            font-size: 14px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .details-box p {
+            margin-bottom: 8px;
+        }
+        .details-box p:last-child {
+            margin-bottom: 0;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: #2d99ae;
+            color: #ffffff;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            margin: 25px 0;
+            transition: background-color 0.3s ease;
+        }
+        .cta-button:hover {
+            background-color: #1f6a7d;
+            text-decoration: none;
+        }
+        .footer {
+            background-color: #f5f5f5;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e0e0e0;
+            font-size: 12px;
+            color: #999;
+        }
+        .footer a {
+            color: #2d99ae;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .signature {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        .signature p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{{ header_title }}</h1>
+            <p>{{ header_subtitle }}</p>
+        </div>
+
+        <div class="content">
+            <h2>{{ greeting }}</h2>
+            <p>{{ intro_text }}</p>
+
+            <div class="details-box">
+                <h3>{{ details_label }}</h3>
+                <p><strong>{{ name_label }}:</strong> {{ first_name }} {{ last_name }}</p>
+                <p><strong>{{ email_label }}:</strong> {{ email }}</p>
+                <p><strong>{{ company_label }}:</strong> {{ company }}</p>
+                {% if phone_number %}
+                <p><strong>{{ phone_label }}:</strong> {{ phone_number }}</p>
+                {% endif %}
+            </div>
+
+            <p>{{ message_intro }}:</p>
+            <p style="font-style: italic; color: #666; padding: 15px; background-color: #f9f9f9; border-radius: 4px;">
+                {{ details }}
+            </p>
+
+            <p>{{ closing_text }}</p>
+
+            <a href="{{ website_url }}" class="cta-button">{{ cta_button }}</a>
+
+            <div class="signature">
+                <p><strong>{{ best_regards }}</strong></p>
+                <p style="margin-top: 10px; color: #999;">
+                    Sander Pelgrims<br>
+                    Full-Stack Web Developer<br>
+                    <a href="{{ website_url }}">{{ website_url }}</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>{{ footer_text }}</p>
+            <p style="margin-top: 10px;">
+                <a href="{{ website_url }}">{{ visit_website }}</a> | 
+                <a href="{{ website_url }}#contact">{{ contact_us }}</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
