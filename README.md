@@ -18,25 +18,13 @@ Personal portfolio site (Flask backend + static frontend) with v2 as the default
 pip install -r requirements.txt
 ```
 
-3. Install frontend dependencies:
-
-```bash
-npm ci
-```
-
-4. Create local env file:
+3. Create local env file:
 
 ```bash
 cp .env.example .env
 ```
 
-5. Build CSS:
-
-```bash
-npm run build:css
-```
-
-6. Run app:
+4. Run app:
 
 ```bash
 python app.py
