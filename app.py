@@ -132,11 +132,6 @@ def create_app():
         language = _sanitize_language(request.cookies.get("language", "en"))
         return _render_page("index.html", language)
 
-    @app.route("/v2", methods=["GET"])
-    def v2():
-        language = _sanitize_language(request.cookies.get("language", "en"))
-        return _render_page("index.html", language)
-
     @app.route("/contact", methods=["POST"])
     def contact():
         try:
