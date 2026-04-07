@@ -859,7 +859,14 @@
       }
 
       .grecaptcha-badge {
-        visibility: hidden;
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+
+      .grecaptcha-badge iframe {
+        display: none !important;
       }
 
       /* ========== FOOTER ========== */
