@@ -34,7 +34,7 @@
 
     <link rel="icon" href="/assets/icon.svg">
   </head>
-  <body>
+  <body data-recaptcha-site-key="{{ recaptcha_site_key }}">
 
     <div class="language-selector floating" id="language-selector">
       <button class="language-btn" aria-label="Select language">
@@ -43,9 +43,9 @@
         <i class="bi bi-chevron-up"></i>
       </button>
       <div class="language-dropdown">
-        <a class="language-option active" data-lang="en" data-i18n="langEnglish">English</a>
-        <a class="language-option" data-lang="nl" data-i18n="langDutch">Nederlands</a>
-        <a class="language-option" data-lang="fr" data-i18n="langFrench">Français</a>
+        <a class="language-option active" href="/?lang=en" data-lang="en" data-i18n="langEnglish">English</a>
+        <a class="language-option" href="/?lang=nl" data-lang="nl" data-i18n="langDutch">Nederlands</a>
+        <a class="language-option" href="/?lang=fr" data-lang="fr" data-i18n="langFrench">Français</a>
       </div>
     </div>
 
@@ -298,6 +298,18 @@
 
           <form id="contactForm" method="POST" action="/contact">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input
+              type="text"
+              id="website"
+              name="website"
+              tabindex="-1"
+              autocomplete="off"
+              aria-hidden="true"
+              style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden"
+            />
+            <input type="hidden" id="form_started_at" name="form_started_at" value="" />
+            <input type="hidden" id="submitted_at" name="submitted_at" value="" />
+            <input type="hidden" id="recaptcha_token" name="recaptcha_token" value="" />
             <div class="form-row">
               <div class="form-group">
                 <label for="fname" data-i18n="labelFirstName">First Name *</label>
@@ -333,7 +345,7 @@
             <!-- Hidden field to track language of form submission -->
             <input type="hidden" id="language" name="language" value="en" />
 
-            <button type="submit" class="submit-btn" data-i18n="submitBtn">Contact me</button>
+            <button type="submit" class="submit-btn" id="submitBtn" data-i18n="submitBtn" disabled>Contact me</button>
           </form>
         </div>
       </div>
@@ -392,6 +404,9 @@
     </div>
 
     <!-- ========== SCRIPTS ========== -->
+    {% if recaptcha_site_key %}
+    <script src="https://www.google.com/recaptcha/api.js?render={{ recaptcha_site_key }}" defer></script>
+    {% endif %}
     <script src="/index-v2.js" defer></script>
 
     <!-- Bootstrap Bundle -->

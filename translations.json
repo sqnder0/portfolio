@@ -45,7 +45,13 @@
       "select_language": "Select Language",
       "english": "English",
       "dutch": "Nederlands",
-      "french": "Français"
+      "french": "Français",
+      "contact_form": {
+        "bot_blocked": "Invalid form submission.",
+        "timing_failed": "Please complete the form and try again.",
+        "rate_limited": "Too many submissions. Please try again later.",
+        "captcha_failed": "Verification failed. Please try again."
+      }
     }
   },
   "nl": {
@@ -94,7 +100,13 @@
       "select_language": "Selecteer taal",
       "english": "English",
       "dutch": "Nederlands",
-      "french": "Français"
+      "french": "Français",
+      "contact_form": {
+        "bot_blocked": "Ongeldige formulierinzending.",
+        "timing_failed": "Vul het formulier volledig in en probeer opnieuw.",
+        "rate_limited": "Te veel inzendingen. Probeer later opnieuw.",
+        "captcha_failed": "Verificatie mislukt. Probeer opnieuw."
+      }
     }
   },
   "fr": {
@@ -143,7 +155,13 @@
       "select_language": "Sélectionner la langue",
       "english": "English",
       "dutch": "Nederlands",
-      "french": "Français"
+      "french": "Français",
+      "contact_form": {
+        "bot_blocked": "Soumission de formulaire invalide.",
+        "timing_failed": "Veuillez remplir le formulaire et réessayer.",
+        "rate_limited": "Trop de soumissions. Veuillez réessayer plus tard.",
+        "captcha_failed": "La vérification a échoué. Veuillez réessayer."
+      }
     }
   }
 }

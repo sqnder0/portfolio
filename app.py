@@ -1,12 +1,15 @@
+import json
 import logging
 import os
 import re
 from datetime import datetime
+from urllib import error, parse, request as http_request
 
 from flask import Flask, jsonify, make_response, render_template, request
 from flask_wtf.csrf import CSRFProtect
 
 from config import config_by_name
+from rate_limiter import SubmissionTracker
 from utils import Email, get_cards, get_translation, get_translations
 
 LOGGER = logging.getLogger(__name__)
@@ -65,6 +68,95 @@ def _validate_form_data(form_data):
     return errors
 
 
+def _check_honeypot(form, field_name):
+    return bool((form.get(field_name) or "").strip())
+
+
+def _check_submission_timing(form, min_seconds, max_age_seconds):
+    try:
+        started_at = int((form.get("form_started_at") or "").strip())
+        submitted_at = int((form.get("submitted_at") or "").strip())
+    except ValueError:
+        return False
+
+    elapsed = submitted_at - started_at
+    if elapsed < min_seconds:
+        return False
+
+    now = int(datetime.now().timestamp())
+    if submitted_at > now + 30:
+        return False
+    if (now - submitted_at) > max_age_seconds:
+        return False
+
+    return True
+
+
+def _get_client_ip(req):
+    forwarded = req.headers.get("X-Forwarded-For", "")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return req.remote_addr or "unknown"
+
+
+def _verify_recaptcha_token(token, remote_ip, app_config):
+    secret = (app_config.get("RECAPTCHA_SECRET_KEY") or "").strip()
+    required = bool(app_config.get("RECAPTCHA_REQUIRED", False))
+
+    if not secret:
+        return (not required), "missing-secret"
+
+    if not token:
+        return False, "missing-token"
+
+    payload = parse.urlencode(
+        {
+            "secret": secret,
+            "response": token,
+            "remoteip": remote_ip,
+        }
+    ).encode("utf-8")
+
+    req = http_request.Request(
+        "https://www.google.com/recaptcha/api/siteverify",
+        data=payload,
+        headers={
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": "portfolio-app/1.0 (+https://sqnder.dev)",
+            "Accept": "application/json",
+        },
+        method="POST",
+    )
+
+    try:
+        with http_request.urlopen(req, timeout=8) as response:
+            raw_data = response.read().decode("utf-8", errors="ignore")
+        parsed = json.loads(raw_data)
+    except (error.URLError, error.HTTPError, ValueError) as exc:
+        LOGGER.warning("reCAPTCHA verification request failed: %s", exc)
+        if app_config.get("RECAPTCHA_FAIL_OPEN", True):
+            return True, "verification-unavailable"
+        return False, "verification-unavailable"
+
+    if not parsed.get("success"):
+        return False, "verification-failed"
+
+    expected_action = app_config.get("RECAPTCHA_ACTION", "contact_form")
+    if parsed.get("action") != expected_action:
+        return False, "invalid-action"
+
+    try:
+        score = float(parsed.get("score", 0.0))
+    except (TypeError, ValueError):
+        score = 0.0
+
+    min_score = float(app_config.get("RECAPTCHA_MIN_SCORE", 0.5))
+    if score < min_score:
+        return False, "low-score"
+
+    return True, "ok"
+
+
 def _sanitize_language(raw_language):
     language = (raw_language or "en").lower()
     if language not in {"en", "nl", "fr"}:
@@ -94,6 +186,7 @@ def create_app():
     )
 
     CSRFProtect(app)
+    app.extensions["submission_tracker"] = SubmissionTracker(app.config["DATABASE_PATH"])
 
     @app.after_request
     def set_headers(response):
@@ -102,7 +195,16 @@ def create_app():
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers[
             "Content-Security-Policy"
-        ] = "default-src 'self'; img-src 'self' data:; style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; script-src 'self' https://cdn.jsdelivr.net; font-src 'self' https://cdn.jsdelivr.net; connect-src 'self'; frame-ancestors 'none';"
+        ] = (
+            "default-src 'self'; "
+            "img-src 'self' data:; "
+            "style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; "
+            "script-src 'self' https://cdn.jsdelivr.net https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; "
+            "font-src 'self' https://cdn.jsdelivr.net; "
+            "connect-src 'self' https://www.google.com/recaptcha/; "
+            "frame-src https://www.google.com/recaptcha/; "
+            "frame-ancestors 'none';"
+        )
         if request.endpoint == "static":
             static_ext = os.path.splitext(request.path)[1].lower()
             long_cache_ext = {".css", ".js", ".mjs", ".png", ".jpg", ".jpeg", ".webp", ".svg", ".woff", ".woff2"}
@@ -117,6 +219,7 @@ def create_app():
         return {
             "current_language": language,
             "translations": get_translations(),
+            "recaptcha_site_key": app.config.get("RECAPTCHA_SITE_KEY", ""),
         }
 
     # GET endpoint avoids CSRF failures for the JS language selector.
@@ -129,8 +232,14 @@ def create_app():
 
     @app.route("/", methods=["GET"])
     def index():
-        language = _sanitize_language(request.cookies.get("language", "en"))
-        return _render_page("index.html", language)
+        query_language = request.args.get("lang")
+        cookie_language = request.cookies.get("language", "en")
+        language = _sanitize_language(query_language or cookie_language)
+
+        response = make_response(_render_page("index.html", language))
+        if query_language:
+            response.set_cookie("language", language, max_age=31536000, samesite="Lax")
+        return response
 
     @app.route("/contact", methods=["POST"])
     def contact():
@@ -139,6 +248,44 @@ def create_app():
                 request.form.get("language", request.cookies.get("language", "en"))
             )
             target_template = "index.html"
+
+            if _check_honeypot(request.form, app.config.get("HONEYPOT_FIELD_NAME", "website")):
+                LOGGER.warning("Contact form rejected by honeypot")
+                return (
+                    _render_page(
+                        target_template,
+                        language,
+                        message=get_translation(
+                            language,
+                            "ui",
+                            "contact_form",
+                            "bot_blocked",
+                            default="Invalid form submission.",
+                        ),
+                    ),
+                    400,
+                )
+
+            if not _check_submission_timing(
+                request.form,
+                int(app.config.get("MIN_FORM_FILL_SECONDS", 2)),
+                int(app.config.get("MAX_FORM_AGE_SECONDS", 7200)),
+            ):
+                LOGGER.warning("Contact form rejected by timing check")
+                return (
+                    _render_page(
+                        target_template,
+                        language,
+                        message=get_translation(
+                            language,
+                            "ui",
+                            "contact_form",
+                            "timing_failed",
+                            default="Please complete the form and try again.",
+                        ),
+                    ),
+                    429,
+                )
 
             form_data = _build_form_data(request.form)
             errors = _validate_form_data(form_data)
@@ -152,6 +299,61 @@ def create_app():
                         error={"code": 422, "description": errors[0]},
                     ),
                     422,
+                )
+
+            client_ip = _get_client_ip(request)
+            tracker = app.extensions.get("submission_tracker")
+            if tracker:
+                limited, reason = tracker.is_rate_limited(
+                    ip_address=client_ip,
+                    email=form_data["email"],
+                    window_seconds=int(app.config.get("RATE_LIMIT_WINDOW_SECONDS", 86400)),
+                    per_ip_limit=int(app.config.get("RATE_LIMIT_PER_IP", 5)),
+                    per_email_limit=int(app.config.get("RATE_LIMIT_PER_EMAIL", 1)),
+                )
+                if limited:
+                    LOGGER.warning(
+                        "Contact form rate limited by %s (ip=%s, email=%s)",
+                        reason,
+                        client_ip,
+                        form_data["email"],
+                    )
+                    return (
+                        _render_page(
+                            target_template,
+                            language,
+                            message=get_translation(
+                                language,
+                                "ui",
+                                "contact_form",
+                                "rate_limited",
+                                default="Too many submissions. Please try again later.",
+                            ),
+                        ),
+                        429,
+                    )
+
+            recaptcha_token = _normalize_text(request.form.get("recaptcha_token"), 2048)
+            recaptcha_ok, recaptcha_reason = _verify_recaptcha_token(
+                recaptcha_token,
+                client_ip,
+                app.config,
+            )
+            if not recaptcha_ok:
+                LOGGER.warning("reCAPTCHA rejected contact form submission: %s", recaptcha_reason)
+                return (
+                    _render_page(
+                        target_template,
+                        language,
+                        message=get_translation(
+                            language,
+                            "ui",
+                            "contact_form",
+                            "captcha_failed",
+                            default="Please retry the verification and submit again.",
+                        ),
+                    ),
+                    403,
                 )
 
             website_url = os.getenv("WEBSITE_URL", "https://sqnder.dev")
@@ -266,6 +468,13 @@ def create_app():
                     ),
                     202,
                 )
+
+            if tracker:
+                try:
+                    tracker.record_submission(client_ip, form_data["email"])
+                    tracker.cleanup(int(app.config.get("RATE_LIMIT_RETENTION_DAYS", 30)))
+                except Exception as exc:
+                    LOGGER.warning("Unable to persist submission for rate limiting: %s", exc)
 
             return _render_page(
                 target_template,

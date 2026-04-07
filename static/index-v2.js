@@ -223,6 +223,11 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   function getCurrentLanguage() {
+    const queryLanguage = new URLSearchParams(window.location.search).get("lang");
+    if (queryLanguage && ["en", "nl", "fr"].indexOf(queryLanguage) !== -1) {
+      return queryLanguage;
+    }
+
     const cookies = document.cookie.split("; ");
     for (const cookie of cookies) {
       if (cookie.startsWith("language=")) {
@@ -339,9 +344,56 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const contactForm = document.getElementById("contactForm");
   if (contactForm) {
+    const submitBtn = document.getElementById("submitBtn");
+    const startedAtInput = document.getElementById("form_started_at");
+    const submittedAtInput = document.getElementById("submitted_at");
+    const recaptchaInput = document.getElementById("recaptcha_token");
+    const recaptchaSiteKey = document.body.getAttribute("data-recaptcha-site-key") || "";
+
+    if (startedAtInput) {
+      startedAtInput.value = Math.floor(Date.now() / 1000).toString();
+    }
+
+    if (submitBtn) {
+      window.setTimeout(function () {
+        submitBtn.disabled = false;
+      }, 2000);
+    }
+
     contactForm.addEventListener("submit", function (e) {
       e.preventDefault();
-      contactForm.submit();
+
+      if (submitBtn && submitBtn.disabled) {
+        return;
+      }
+
+      if (submittedAtInput) {
+        submittedAtInput.value = Math.floor(Date.now() / 1000).toString();
+      }
+
+      const completeSubmit = function () {
+        contactForm.submit();
+      };
+
+      if (!recaptchaSiteKey || typeof grecaptcha === "undefined") {
+        completeSubmit();
+        return;
+      }
+
+      grecaptcha.ready(function () {
+        grecaptcha
+          .execute(recaptchaSiteKey, { action: "contact_form" })
+          .then(function (token) {
+            if (recaptchaInput) {
+              recaptchaInput.value = token || "";
+            }
+            completeSubmit();
+          })
+          .catch(function (err) {
+            console.error("reCAPTCHA token generation failed:", err);
+            completeSubmit();
+          });
+      });
     });
   }
 
