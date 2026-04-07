@@ -843,6 +843,25 @@
         transform: translateY(0);
       }
 
+      .captcha-disclaimer {
+        margin-top: 0.75rem;
+        font-size: 0.8rem;
+        line-height: 1.5;
+        color: rgba(248, 218, 208, 0.75);
+      }
+
+      .captcha-disclaimer a {
+        color: var(--light-blue);
+      }
+
+      .captcha-disclaimer a:hover {
+        color: var(--white);
+      }
+
+      .grecaptcha-badge {
+        visibility: hidden;
+      }
+
       /* ========== FOOTER ========== */
       footer {
         background-color: rgba(0, 17, 41, 0.8);
