@@ -5,7 +5,7 @@ import re
 from datetime import datetime
 from urllib import error, parse, request as http_request
 
-from flask import Flask, jsonify, make_response, render_template, request
+from flask import Flask, jsonify, make_response, render_template, request, send_from_directory
 from flask_wtf.csrf import CSRFProtect
 
 from config import config_by_name
@@ -239,6 +239,14 @@ def create_app():
         response = make_response(_render_page("index.html", language))
         if query_language:
             response.set_cookie("language", language, max_age=31536000, samesite="Lax")
+        return response
+
+    @app.route("/robots.txt", methods=["GET"])
+    def robots_txt():
+        static_dir = app.static_folder or "static"
+        response = make_response(send_from_directory(static_dir, "robots.txt"))
+        response.headers["Content-Type"] = "text/plain; charset=utf-8"
+        response.headers["Cache-Control"] = "public, max-age=300"
         return response
 
     @app.route("/contact", methods=["POST"])
