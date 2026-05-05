@@ -1,0 +1,10 @@
+[
+  {
+    "id": "calculator-qhorse",
+    "title_key": "projectCalcTitle",
+    "description_key": "projectCalcText",
+    "icon": "bi-calculator",
+    "tags": ["JavaScript", "Quote System", "Frontend"],
+    "url": "https://calculator.qhorse.be"
+  }
+]

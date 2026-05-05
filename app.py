@@ -10,7 +10,7 @@ from flask_wtf.csrf import CSRFProtect
 
 from config import config_by_name
 from rate_limiter import SubmissionTracker
-from utils import Email, get_cards, get_translation, get_translations
+from utils import Email, get_cards, get_projects, get_translation, get_translations
 
 LOGGER = logging.getLogger(__name__)
 
@@ -168,7 +168,9 @@ def _render_page(template_name, language, **kwargs):
     return render_template(
         template_name,
         cards=get_cards(),
+        projects=get_projects(),
         current_language=language,
+        get_translation=get_translation,
         translations=get_translations(),
         **kwargs,
     )

@@ -188,73 +188,24 @@
       <div class="container-custom">
         <h2><span data-i18n="projectsTitlePrefix">Featured</span> <span class="text-accent" data-i18n="projectsTitleAccent">Projects</span></h2>
         <div class="projects-grid">
+          {% for project in projects %}
           <div class="project-card fade-in">
             <div class="project-image">
-              <i class="bi bi-browser"></i>
+              <i class="bi {{ project.icon }}"></i>
             </div>
             <div class="project-content">
-              <h3 data-i18n="project1Title">Portfolio Website</h3>
-              <p data-i18n="project1Text">
-                A modern, fully responsive portfolio showcasing web development skills with smooth animations and mobile-first design.
+              <h3 data-i18n="{{ project.title_key }}">{{ get_translation(current_language, 'ui', project.title_key) }}</h3>
+              <p data-i18n="{{ project.description_key }}">
+                {{ get_translation(current_language, 'ui', project.description_key) }}
               </p>
               <div class="project-tags">
-                <span class="project-tag">HTML/CSS</span>
-                <span class="project-tag">Bootstrap</span>
-                <span class="project-tag">Responsive</span>
+                {% for tag in project.tags %}
+                <span class="project-tag">{{ tag }}</span>
+                {% endfor %}
               </div>
             </div>
           </div>
-
-          <div class="project-card fade-in">
-            <div class="project-image">
-              <i class="bi bi-cloud-data"></i>
-            </div>
-            <div class="project-content">
-              <h3 data-i18n="project2Title">Full-Stack Web App</h3>
-              <p data-i18n="project2Text">
-                Complete web application with frontend and backend, featuring database integration and user authentication systems.
-              </p>
-              <div class="project-tags">
-                <span class="project-tag">Flask</span>
-                <span class="project-tag">Python</span>
-                <span class="project-tag">Database</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="project-card fade-in">
-            <div class="project-image">
-              <i class="bi bi-speedometer"></i>
-            </div>
-            <div class="project-content">
-              <h3 data-i18n="project3Title">Performance Optimizer</h3>
-              <p data-i18n="project3Text">
-                Optimized existing websites for speed and SEO, achieving 90+ Lighthouse scores and improved user engagement metrics.
-              </p>
-              <div class="project-tags">
-                <span class="project-tag">Optimization</span>
-                <span class="project-tag">SEO</span>
-                <span class="project-tag">Performance</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="project-card fade-in">
-            <div class="project-image">
-              <i class="bi bi-palette"></i>
-            </div>
-            <div class="project-content">
-              <h3 data-i18n="project4Title">Design System</h3>
-              <p data-i18n="project4Text">
-                Created comprehensive design system and component library for consistent branding and rapid development across projects.
-              </p>
-              <div class="project-tags">
-                <span class="project-tag">Design</span>
-                <span class="project-tag">Components</span>
-                <span class="project-tag">UI/UX</span>
-              </div>
-            </div>
-          </div>
+          {% endfor %}
         </div>
       </div>
     </section>

@@ -14,6 +14,7 @@ LOGGER = logging.getLogger(__name__)
 _CARD_CACHE = None
 _CARD_CACHE_EXPIRES_AT = 0
 _TRANSLATIONS_CACHE = None
+_PROJECTS_CACHE = None
 
 
 class Database:
@@ -175,3 +176,19 @@ def get_cards():
     _CARD_CACHE = cards
     _CARD_CACHE_EXPIRES_AT = now + cache_ttl
     return cards
+
+
+def get_projects():
+    global _PROJECTS_CACHE
+
+    if _PROJECTS_CACHE is not None:
+        return _PROJECTS_CACHE
+
+    try:
+        with open("projects.json", "r", encoding="utf-8") as file:
+            _PROJECTS_CACHE = json.load(file)
+    except Exception as exc:
+        LOGGER.error("Failed to load projects: %s", exc)
+        _PROJECTS_CACHE = []
+
+    return _PROJECTS_CACHE

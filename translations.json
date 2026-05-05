@@ -51,7 +51,11 @@
         "timing_failed": "Please complete the form and try again.",
         "rate_limited": "Too many submissions. Please try again later.",
         "captcha_failed": "Verification failed. Please try again."
-      }
+      },
+      "projectsTitlePrefix": "Featured",
+      "projectsTitleAccent": "Projects",
+      "projectCalcTitle": "QHorse Transport Calculator",
+      "projectCalcText": "A transparent horse transport quote calculator built for QHorse. Customers can quickly estimate transport costs with real-time pricing calculations based on distance and number of horses."
     }
   },
   "nl": {
@@ -101,6 +105,10 @@
       "english": "English",
       "dutch": "Nederlands",
       "french": "Français",
+      "projectsTitlePrefix": "Uitgelichte",
+      "projectsTitleAccent": "Projecten",
+      "projectCalcTitle": "QHorse Vervoercalculator",
+      "projectCalcText": "Een transparante paardenvervoer offerterekenmachine gebouwd voor QHorse. Klanten kunnen vervoerskosten snel schatten met realtime prijsberekeningen op basis van afstand en aantal paarden.",
       "contact_form": {
         "bot_blocked": "Ongeldige formulierinzending.",
         "timing_failed": "Vul het formulier volledig in en probeer opnieuw.",
@@ -161,7 +169,11 @@
         "timing_failed": "Veuillez remplir le formulaire et réessayer.",
         "rate_limited": "Trop de soumissions. Veuillez réessayer plus tard.",
         "captcha_failed": "La vérification a échoué. Veuillez réessayer."
-      }
+      },
+      "projectsTitlePrefix": "Projets",
+      "projectsTitleAccent": "en vedette",
+      "projectCalcTitle": "Calculateur de transport QHorse",
+      "projectCalcText": "Un calculateur transparent de devis de transport de chevaux construit pour QHorse. Les clients peuvent estimer rapidement les frais de transport avec des calculs de prix en temps réel basés sur la distance et le nombre de chevaux."
     }
   }
 }
