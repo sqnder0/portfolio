@@ -43,6 +43,7 @@ class EmailDashboardStore:
                     cta_url TEXT,
                     signature_name TEXT NOT NULL,
                     signature_role TEXT,
+                    footer_text TEXT,
                     created_at TEXT NOT NULL,
                     updated_at TEXT NOT NULL,
                     FOREIGN KEY (client_id) REFERENCES email_clients (id) ON DELETE SET NULL
@@ -66,6 +67,7 @@ class EmailDashboardStore:
                     cta_url TEXT,
                     signature_name TEXT NOT NULL,
                     signature_role TEXT,
+                    footer_text TEXT,
                     sent_at TEXT NOT NULL,
                     FOREIGN KEY (client_id) REFERENCES email_clients (id) ON DELETE SET NULL
                 )
@@ -80,6 +82,21 @@ class EmailDashboardStore:
             conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_sent_emails_sent_at ON sent_emails(sent_at DESC)"
             )
+            # Ensure footer_text column exists for older databases
+            try:
+                cur = conn.execute("PRAGMA table_info(email_drafts)")
+                cols = [r[1] for r in cur.fetchall()]
+                if "footer_text" not in cols:
+                    conn.execute("ALTER TABLE email_drafts ADD COLUMN footer_text TEXT")
+            except Exception:
+                pass
+            try:
+                cur = conn.execute("PRAGMA table_info(sent_emails)")
+                cols = [r[1] for r in cur.fetchall()]
+                if "footer_text" not in cols:
+                    conn.execute("ALTER TABLE sent_emails ADD COLUMN footer_text TEXT")
+            except Exception:
+                pass
             conn.commit()
 
     def list_clients(self):
@@ -144,7 +161,7 @@ class EmailDashboardStore:
                     SET client_id = ?, recipient_name = ?, recipient_email = ?, subject = ?,
                         header_title = ?, header_subtitle = ?, greeting = ?, intro_text = ?,
                         body_text = ?, cta_text = ?, cta_url = ?,
-                        signature_name = ?, signature_role = ?, updated_at = ?
+                        signature_name = ?, signature_role = ?, footer_text = ?, updated_at = ?
                     WHERE id = ?
                     """,
                     (
@@ -161,6 +178,7 @@ class EmailDashboardStore:
                         payload["cta_url"],
                         payload["signature_name"],
                         payload["signature_role"],
+                        payload.get("footer_text"),
                         now,
                         draft_id,
                     ),
@@ -173,7 +191,7 @@ class EmailDashboardStore:
                 INSERT INTO email_drafts (
                     client_id, recipient_name, recipient_email, subject,
                     header_title, header_subtitle, greeting, intro_text, body_text,
-                    cta_text, cta_url, signature_name, signature_role,
+                    cta_text, cta_url, signature_name, signature_role, footer_text,
                     created_at, updated_at
                 )
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -192,6 +210,7 @@ class EmailDashboardStore:
                     payload["cta_url"],
                     payload["signature_name"],
                     payload["signature_role"],
+                    payload.get("footer_text"),
                     now,
                     now,
                 ),
@@ -226,7 +245,7 @@ class EmailDashboardStore:
                 INSERT INTO sent_emails (
                     client_id, recipient_name, recipient_email, subject,
                     header_title, header_subtitle, greeting, intro_text, body_text,
-                    cta_text, cta_url, signature_name, signature_role, sent_at
+                    cta_text, cta_url, signature_name, signature_role, footer_text, sent_at
                 )
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
@@ -244,6 +263,7 @@ class EmailDashboardStore:
                     payload["cta_url"],
                     payload["signature_name"],
                     payload["signature_role"],
+                    payload.get("footer_text"),
                     sent_at,
                 ),
             )

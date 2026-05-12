@@ -106,9 +106,9 @@
             <h2>{{ greeting }}</h2>
             <p>{{ intro_text }}</p>
 
-            <div class="message-box">
+            <p class="message-box">
                 <p>{{ body_text }}</p>
-            </div>
+            </p>
 
             {% if cta_text and cta_url %}
             <a href="{{ cta_url }}" class="cta-button">{{ cta_text }}</a>
@@ -119,17 +119,23 @@
                 {% if signature_role %}
                 <p>{{ signature_role }}</p>
                 {% endif %}
+                {% if website_url %}
                 <p style="margin-top: 10px; color: #999;">
                     <a href="{{ website_url }}">{{ website_url }}</a>
+                {% endif %}
                 </p>
             </div>
         </div>
 
         <div class="footer">
-            <p>This email was sent from your portfolio client dashboard.</p>
             <p style="margin-top: 10px;">
                 <a href="{{ website_url }}">Visit Website</a>
             </p>
+            {% if footer_text %}
+            <p style="margin-top:8px;font-size:12px;color:#999;">{{ footer_text }}</p>
+            {% else %}
+            <p style="margin-top:8px;font-size:12px;color:#999;">Email sent fueled by coffee and optimism : )</p>
+            {% endif %}
         </div>
     </div>
 </body>

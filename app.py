@@ -213,6 +213,7 @@ def _dashboard_compose_defaults():
         "cta_url": os.getenv("WEBSITE_URL", "https://sqnder.dev"),
         "signature_name": "Sander Pelgrims",
         "signature_role": "Full-Stack Web Developer",
+        "footer_text": "Sent from a laptop, fueled by coffee and optimism — no private jets were harmed.",
     }
 
 
@@ -247,6 +248,7 @@ def _build_dashboard_payload(form, selected_client=None):
         "signature_role": _normalize_text(
             form.get("signature_role"), EMAIL_DASHBOARD_LIMITS["signature_role"]
         ),
+        "footer_text": _normalize_text(form.get("footer_text"), 1000, allow_newlines=True),
     }
 
     client_id_raw = (form.get("client_id") or "").strip()
@@ -290,6 +292,8 @@ def _validate_dashboard_payload(payload):
     if cta_url and not (cta_url.startswith("https://") or cta_url.startswith("http://")):
         errors.append("CTA URL must start with http:// or https://")
 
+    # footer_text is optional, no validation required
+
     return errors
 
 
@@ -311,6 +315,7 @@ def _payload_to_compose(payload, draft_id=None):
             "cta_url": payload.get("cta_url", ""),
             "signature_name": payload.get("signature_name", ""),
             "signature_role": payload.get("signature_role", ""),
+            "footer_text": payload.get("footer_text", ""),
         }
     )
     return compose
@@ -376,6 +381,7 @@ def create_app():
             cta_url=payload["cta_url"],
             signature_name=payload["signature_name"],
             signature_role=payload["signature_role"],
+            footer_text=payload.get("footer_text"),
             website_url=os.getenv("WEBSITE_URL", "https://sqnder.dev"),
         )
 
