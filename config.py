@@ -28,6 +28,8 @@ class BaseConfig:
     RECAPTCHA_MIN_SCORE = float(os.getenv("RECAPTCHA_MIN_SCORE", "0.5"))
     RECAPTCHA_REQUIRED = _env_bool("RECAPTCHA_REQUIRED", False)
     RECAPTCHA_FAIL_OPEN = _env_bool("RECAPTCHA_FAIL_OPEN", True)
+    DASHBOARD_USERNAME = os.getenv("DASHBOARD_USERNAME", "")
+    DASHBOARD_PASSWORD = os.getenv("DASHBOARD_PASSWORD", "")
 
 
 class DevelopmentConfig(BaseConfig):

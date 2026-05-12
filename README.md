@@ -30,6 +30,26 @@ cp .env.example .env
 python app.py
 ```
 
+## Client Email Dashboard
+
+Compose and send client emails from the built-in panel:
+
+```bash
+GET /dashboard/emails
+```
+
+Features:
+
+- Client address book
+- Draft save and load
+- Send history
+- HTML preview rendered with the same outgoing email template markup
+
+Optional protection for dashboard routes:
+
+- `DASHBOARD_USERNAME`
+- `DASHBOARD_PASSWORD`
+
 ## Nixpacks Deployment
 
 This repo includes `nixpacks.toml` with build/start commands.
