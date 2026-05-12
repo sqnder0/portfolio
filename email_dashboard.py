@@ -247,7 +247,7 @@ class EmailDashboardStore:
                     header_title, header_subtitle, greeting, intro_text, body_text,
                     cta_text, cta_url, signature_name, signature_role, footer_text, sent_at
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     payload["client_id"],
