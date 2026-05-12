@@ -103,12 +103,12 @@
         </div>
 
         <div class="content">
+            <h2>{{ greeting }}</h2>
+            <p>{{ intro_text }}</p>
 
-            <p class="message-box">
-                <h2>{{ greeting }}</h2>
-                <p>{{ intro_text }}</p>
+            <div class="message-box">
                 <p>{{ body_text }}</p>
-            </p>
+            </div>
 
             {% if cta_text and cta_url %}
             <a href="{{ cta_url }}" class="cta-button">{{ cta_text }}</a>
@@ -122,8 +122,8 @@
                 {% if website_url %}
                 <p style="margin-top: 10px; color: #999;">
                     <a href="{{ website_url }}">{{ website_url }}</a>
-                {% endif %}
                 </p>
+                {% endif %}
             </div>
         </div>
 
