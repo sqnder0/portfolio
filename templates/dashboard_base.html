@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ page_title }} | Client Command Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ink: "#e2e8f0",
+                        slateBlue: "#0b1220",
+                        panel: "rgba(15, 23, 42, 0.72)",
+                        panelStrong: "rgba(15, 23, 42, 0.92)",
+                        line: "rgba(148, 163, 184, 0.22)",
+                        accent: "#88f2d5",
+                        accentDeep: "#1f8ea3",
+                        warm: "#f8c07d",
+                        danger: "#ff8c8c",
+                    },
+                    fontFamily: {
+                        sans: ["Space Grotesk", "sans-serif"],
+                        mono: ["IBM Plex Mono", "monospace"],
+                    },
+                    boxShadow: {
+                        glow: "0 0 35px rgba(136, 242, 213, 0.18)",
+                    },
+                    animation: {
+                        enter: "enter 0.6s ease-out forwards",
+                    },
+                    keyframes: {
+                        enter: {
+                            "0%": { opacity: "0", transform: "translateY(12px)" },
+                            "100%": { opacity: "1", transform: "translateY(0)" },
+                        },
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            background: radial-gradient(circle at 20% 20%, rgba(136, 242, 213, 0.08), transparent 45%),
+                radial-gradient(circle at 85% 10%, rgba(248, 192, 125, 0.08), transparent 35%),
+                #0b1220;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+            background-size: 80px 80px;
+            opacity: 0.2;
+            pointer-events: none;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body class="font-sans text-ink antialiased">
+    <div class="relative min-h-screen px-6 py-10 lg:px-12">
+        <div class="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-10">
+            <header class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                <div class="space-y-2">
+                    <p class="font-mono text-xs uppercase tracking-[0.4em] text-slate-400">Command Center</p>
+                    <h1 class="text-3xl font-semibold text-white">{{ page_title }}</h1>
+                    <p class="max-w-xl text-sm text-slate-400">
+                        A clean operational view of prospects, revenue, and renewals for your portfolio pipeline.
+                    </p>
+                </div>
+                <nav class="flex flex-wrap gap-3">
+                    <a
+                        href="/dashboard/prospects"
+                        class="rounded-full border px-4 py-2 text-sm transition {{ 'border-accent text-white shadow-glow' if active_page == 'prospects' else 'border-line text-slate-300 hover:border-accent hover:text-white' }}"
+                    >
+                        Prospects
+                    </a>
+                    <a
+                        href="/dashboard/billing"
+                        class="rounded-full border px-4 py-2 text-sm transition {{ 'border-accent text-white shadow-glow' if active_page == 'billing' else 'border-line text-slate-300 hover:border-accent hover:text-white' }}"
+                    >
+                        Billing
+                    </a>
+                    <a
+                        href="/dashboard/emails"
+                        class="rounded-full border px-4 py-2 text-sm transition border-line text-slate-300 hover:border-accent hover:text-white"
+                    >
+                        Email Desk
+                    </a>
+                </nav>
+            </header>
+
+            {% if message %}
+            <div class="rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
+                {{ message }}
+            </div>
+            {% endif %}
+            {% if error_message %}
+            <div class="rounded-2xl border border-red-400/40 bg-red-400/10 px-4 py-3 text-sm text-red-100">
+                {{ error_message }}
+            </div>
+            {% endif %}
+
+            <main class="flex flex-col gap-8">
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+</body>
+</html>

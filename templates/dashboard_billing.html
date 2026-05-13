@@ -1,0 +1,149 @@
+{% extends "dashboard_base.html" %}
+
+{% block content %}
+<section class="grid gap-4 md:grid-cols-4">
+    <div class="rounded-2xl border border-line bg-panel p-5 shadow-lg">
+        <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Clients</p>
+        <p class="mt-3 text-3xl font-semibold text-white">{{ summary.total_clients }}</p>
+        <p class="mt-2 text-sm text-slate-400">Active annual retainers.</p>
+    </div>
+    <div class="rounded-2xl border border-line bg-panel p-5 shadow-lg">
+        <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Annual Revenue</p>
+        <p class="mt-3 text-3xl font-semibold text-white">{{ summary.total_annual }}</p>
+        <p class="mt-2 text-sm text-slate-400">Recurring fees booked.</p>
+    </div>
+    <div class="rounded-2xl border border-line bg-panel p-5 shadow-lg">
+        <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Due Soon</p>
+        <p class="mt-3 text-3xl font-semibold text-white">{{ summary.due_soon }}</p>
+        <p class="mt-2 text-sm text-slate-400">Renewals inside 7 days.</p>
+    </div>
+    <div class="rounded-2xl border border-line bg-panel p-5 shadow-lg">
+        <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Overdue</p>
+        <p class="mt-3 text-3xl font-semibold text-white">{{ summary.overdue }}</p>
+        <p class="mt-2 text-sm text-slate-400">Past renewal dates.</p>
+    </div>
+</section>
+
+<section class="grid gap-6 lg:grid-cols-[1.1fr_2fr]">
+    <div class="rounded-3xl border border-line bg-panelStrong p-6 shadow-lg">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Client Intake</p>
+                <h2 class="mt-2 text-xl font-semibold text-white">Add or Update Client</h2>
+            </div>
+            <span class="rounded-full border border-line px-3 py-1 text-xs text-slate-300">Postgres-backed</span>
+        </div>
+        <form class="mt-6 space-y-4" method="POST" action="/dashboard/billing/clients">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <div>
+                <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="client_name">Client name</label>
+                <input
+                    class="mt-2 w-full rounded-xl border border-line bg-slateBlue px-4 py-2 text-sm text-white placeholder:text-slate-500"
+                    id="client_name"
+                    name="name"
+                    placeholder="Acme Studio"
+                    required
+                />
+            </div>
+            <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                    <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="startup_cost">Startup cost</label>
+                    <input
+                        class="mt-2 w-full rounded-xl border border-line bg-slateBlue px-4 py-2 text-sm text-white placeholder:text-slate-500"
+                        id="startup_cost"
+                        name="startup_cost"
+                        placeholder="4500"
+                        type="number"
+                        step="0.01"
+                    />
+                </div>
+                <div>
+                    <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="annual_fee">Annual fee</label>
+                    <input
+                        class="mt-2 w-full rounded-xl border border-line bg-slateBlue px-4 py-2 text-sm text-white placeholder:text-slate-500"
+                        id="annual_fee"
+                        name="annual_fee"
+                        placeholder="1200"
+                        type="number"
+                        step="0.01"
+                        required
+                    />
+                </div>
+            </div>
+            <div>
+                <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="hosting_renewal_date">Hosting renewal date</label>
+                <input
+                    class="mt-2 w-full rounded-xl border border-line bg-slateBlue px-4 py-2 text-sm text-white placeholder:text-slate-500"
+                    id="hosting_renewal_date"
+                    name="hosting_renewal_date"
+                    type="date"
+                    required
+                />
+            </div>
+            <button
+                class="w-full rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-slateBlue shadow-glow transition hover:brightness-110"
+                type="submit"
+            >
+                Save Client
+            </button>
+        </form>
+    </div>
+
+    <div class="rounded-3xl border border-line bg-panel p-6 shadow-lg">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Hosting Health</p>
+                <h2 class="mt-2 text-xl font-semibold text-white">Renewal Timeline</h2>
+            </div>
+            <span class="rounded-full border border-line px-3 py-1 text-xs text-slate-300">{{ summary.total_clients }} clients</span>
+        </div>
+        <div class="mt-6 overflow-x-auto">
+            <table class="w-full min-w-[700px] text-left text-sm">
+                <thead class="text-xs uppercase tracking-[0.2em] text-slate-500">
+                    <tr>
+                        <th class="pb-3">Client</th>
+                        <th class="pb-3">Startup</th>
+                        <th class="pb-3">Annual Fee</th>
+                        <th class="pb-3">Renewal</th>
+                        <th class="pb-3">Hosting Health</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-line text-slate-200">
+                    {% for client in clients %}
+                    <tr class="align-top">
+                        <td class="py-4">
+                            <p class="font-medium text-white">{{ client.name }}</p>
+                        </td>
+                        <td class="py-4 text-slate-300">{{ client.startup_cost }}</td>
+                        <td class="py-4 text-slate-300">{{ client.annual_fee }}</td>
+                        <td class="py-4 text-slate-300">
+                            <p class="font-mono text-xs">{{ client.renewal_date }}</p>
+                            {% if client.days_until is not none %}
+                            <p class="mt-1 text-xs text-slate-500">{{ client.days_until }} days</p>
+                            {% endif %}
+                        </td>
+                        <td class="py-4">
+                            <div class="flex flex-col gap-2">
+                                <div class="h-2 w-full rounded-full bg-slate-800">
+                                    <div
+                                        class="h-2 rounded-full {% if client.health.tone == 'red' %}bg-red-400{% elif client.health.tone == 'amber' %}bg-amber-400{% elif client.health.tone == 'emerald' %}bg-emerald-400{% else %}bg-slate-500{% endif %}"
+                                        style="width: {{ client.health.percent }}%"
+                                    ></div>
+                                </div>
+                                <span class="text-xs text-slate-400">{{ client.health.label }}</span>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="py-8 text-center text-sm text-slate-400">
+                            No client records yet. Add one to track renewals.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

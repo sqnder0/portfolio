@@ -50,6 +50,28 @@ Optional protection for dashboard routes:
 - `DASHBOARD_USERNAME`
 - `DASHBOARD_PASSWORD`
 
+## Client and Lead Dashboard
+
+Command center routes:
+
+- `/dashboard/prospects`
+- `/dashboard/billing`
+
+Requires:
+
+- `DATABASE_URL` (external Postgres)
+
+Hosting renewal notifier (run via cron):
+
+```bash
+python hosting_renewal_worker.py
+```
+
+Optional worker env values:
+
+- `DASHBOARD_ALERT_DAYS` (default: 7)
+- `DASHBOARD_DRY_RUN` (set to true to skip sending)
+
 ## Nixpacks Deployment
 
 This repo includes `nixpacks.toml` with build/start commands.

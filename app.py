@@ -2,15 +2,27 @@ import json
 import logging
 import os
 import re
-from functools import wraps
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
+from functools import wraps
 from urllib import error, parse, request as http_request
 
-from flask import Flask, jsonify, make_response, render_template, request, send_from_directory
+from flask import (
+    Flask,
+    jsonify,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    send_from_directory,
+    url_for,
+)
 from flask_wtf.csrf import CSRFProtect
 
 from config import config_by_name
+from dashboard_db import Client, Prospect, build_dashboard_db_from_env
 from email_dashboard import EmailDashboardStore
+from lead_scraper import scrape_prospects
 from rate_limiter import SubmissionTracker
 from utils import Email, get_cards, get_projects, get_translation, get_translations
 
@@ -321,6 +333,57 @@ def _payload_to_compose(payload, draft_id=None):
     return compose
 
 
+def _parse_decimal(raw_value, field_label, errors):
+    value = (raw_value or "").strip()
+    if not value:
+        return None
+    try:
+        return Decimal(value)
+    except InvalidOperation:
+        errors.append(f"{field_label} must be a valid number.")
+        return None
+
+
+def _parse_date(raw_value, field_label, errors):
+    value = (raw_value or "").strip()
+    if not value:
+        errors.append(f"{field_label} is required.")
+        return None
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except ValueError:
+        errors.append(f"{field_label} must use YYYY-MM-DD format.")
+        return None
+
+
+def _format_money(value):
+    if value is None:
+        return "-"
+    return f"{value:,.2f}"
+
+
+def _days_until(date_value):
+    if not date_value:
+        return None
+    today = datetime.utcnow().date()
+    return (date_value - today).days
+
+
+def _hosting_health(days_until):
+    if days_until is None:
+        return {"tone": "slate", "label": "No renewal date", "percent": 0}
+    if days_until < 0:
+        return {"tone": "red", "label": f"Overdue by {abs(days_until)} days", "percent": 0}
+    if days_until <= 7:
+        percent = int(max(0, min(100, (days_until / 365) * 100)))
+        return {"tone": "red", "label": f"Due in {days_until} days", "percent": percent}
+    if days_until <= 30:
+        percent = int(max(0, min(100, (days_until / 365) * 100)))
+        return {"tone": "amber", "label": f"Due in {days_until} days", "percent": percent}
+    percent = int(max(0, min(100, (days_until / 365) * 100)))
+    return {"tone": "emerald", "label": f"Due in {days_until} days", "percent": percent}
+
+
 def create_app():
     app = Flask(__name__, static_url_path="", static_folder="static")
 
@@ -335,6 +398,19 @@ def create_app():
     CSRFProtect(app)
     app.extensions["submission_tracker"] = SubmissionTracker(app.config["DATABASE_PATH"])
     app.extensions["email_dashboard_store"] = EmailDashboardStore(app.config["DATABASE_PATH"])
+
+    dashboard_db = None
+    dashboard_db_error = ""
+    try:
+        dashboard_db = build_dashboard_db_from_env()
+        if dashboard_db:
+            dashboard_db.create_tables()
+    except Exception as exc:
+        LOGGER.error("Failed to initialize dashboard database: %s", exc)
+        dashboard_db_error = "Dashboard database could not be initialized."
+
+    app.extensions["dashboard_db"] = dashboard_db
+    app.extensions["dashboard_db_error"] = dashboard_db_error
 
     def require_dashboard_auth(view):
         @wraps(view)
@@ -385,6 +461,133 @@ def create_app():
             website_url=os.getenv("WEBSITE_URL", "https://sqnder.dev"),
         )
 
+    def _get_dashboard_db_or_error():
+        db = app.extensions.get("dashboard_db")
+        error_message = (app.extensions.get("dashboard_db_error") or "").strip()
+        if not db:
+            error_message = error_message or (
+                "DATABASE_URL is not configured. Set it to your external Postgres instance."
+            )
+        return db, error_message
+
+    def _load_prospects(db):
+        with db.session() as session:
+            rows = (
+                session.query(Prospect)
+                .order_by(
+                    Prospect.contacted_status.asc(),
+                    Prospect.performance_flag.desc(),
+                    Prospect.name.asc(),
+                )
+                .all()
+            )
+
+        leads = []
+        for row in rows:
+            leads.append(
+                {
+                    "id": row.id,
+                    "name": row.name,
+                    "region": row.region,
+                    "website": row.website or "",
+                    "performance_flag": bool(row.performance_flag),
+                    "contacted_status": bool(row.contacted_status),
+                }
+            )
+
+        total = len(leads)
+        flagged = sum(1 for lead in leads if lead["performance_flag"])
+        contacted = sum(1 for lead in leads if lead["contacted_status"])
+        stats = {
+            "total": total,
+            "flagged": flagged,
+            "contacted": contacted,
+        }
+        return leads, stats
+
+    def _load_clients(db):
+        with db.session() as session:
+            rows = session.query(Client).order_by(Client.hosting_renewal_date.asc()).all()
+
+        clients = []
+        total_annual = Decimal("0")
+        due_soon = 0
+        overdue = 0
+
+        for row in rows:
+            days_until = _days_until(row.hosting_renewal_date)
+            health = _hosting_health(days_until)
+            if row.annual_fee is not None:
+                total_annual += row.annual_fee
+            if days_until is not None and days_until <= 7:
+                due_soon += 1
+            if days_until is not None and days_until < 0:
+                overdue += 1
+
+            clients.append(
+                {
+                    "id": row.id,
+                    "name": row.name,
+                    "startup_cost": _format_money(row.startup_cost),
+                    "annual_fee": _format_money(row.annual_fee),
+                    "renewal_date": row.hosting_renewal_date.isoformat(),
+                    "days_until": days_until,
+                    "health": health,
+                }
+            )
+
+        summary = {
+            "total_clients": len(clients),
+            "total_annual": _format_money(total_annual),
+            "due_soon": due_soon,
+            "overdue": overdue,
+        }
+        return clients, summary
+
+    def render_prospects_dashboard(message="", error_message="", region="", keywords=""):
+        db, db_error = _get_dashboard_db_or_error()
+        leads = []
+        stats = {"total": 0, "flagged": 0, "contacted": 0}
+
+        if db:
+            leads, stats = _load_prospects(db)
+
+        if db_error and not error_message:
+            error_message = db_error
+
+        return render_template(
+            "dashboard_prospects.html",
+            page_title="Prospects",
+            active_page="prospects",
+            leads=leads,
+            stats=stats,
+            region=region,
+            keywords=keywords,
+            message=message,
+            error_message=error_message,
+        )
+
+    def render_billing_dashboard(message="", error_message=""):
+        db, db_error = _get_dashboard_db_or_error()
+        clients = []
+        summary = {"total_clients": 0, "total_annual": "-", "due_soon": 0, "overdue": 0}
+
+        if db:
+            clients, summary = _load_clients(db)
+
+        if db_error and not error_message:
+            error_message = db_error
+
+        return render_template(
+            "dashboard_billing.html",
+            page_title="Billing",
+            active_page="billing",
+            clients=clients,
+            summary=summary,
+            message=message,
+            error_message=error_message,
+        )
+
     @app.after_request
     def set_headers(response):
         response.headers["X-Content-Type-Options"] = "nosniff"
@@ -395,9 +598,9 @@ def create_app():
         ] = (
             "default-src 'self'; "
             "img-src 'self' data:; "
-            "style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; "
-            "script-src 'self' https://cdn.jsdelivr.net https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; "
-            "font-src 'self' https://cdn.jsdelivr.net; "
+            "style-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com 'unsafe-inline'; "
+            "script-src 'self' https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; "
+            "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com; "
             "connect-src 'self' https://www.google.com/recaptcha/; "
             "frame-src https://www.google.com/recaptcha/; "
             "frame-ancestors 'none';"
@@ -844,6 +1047,158 @@ def create_app():
             compose=_dashboard_compose_defaults(),
             message=f"Email sent to {payload['recipient_email']}.",
         )
+
+    @app.route("/dashboard/prospects", methods=["GET"])
+    @require_dashboard_auth
+    def prospects_dashboard():
+        default_region = os.getenv("DASHBOARD_DEFAULT_REGION", "")
+        region = _normalize_text(request.args.get("region") or default_region, 120)
+        keywords = _normalize_text(request.args.get("keywords"), 200)
+        message = (request.args.get("message") or "").strip()
+        error_message = (request.args.get("error") or "").strip()
+        return render_prospects_dashboard(
+            message=message,
+            error_message=error_message,
+            region=region,
+            keywords=keywords,
+        )
+
+    @app.route("/dashboard/prospects/scrape", methods=["POST"])
+    @require_dashboard_auth
+    def prospects_scrape():
+        db, db_error = _get_dashboard_db_or_error()
+        if not db:
+            return render_prospects_dashboard(error_message=db_error)
+
+        region = _normalize_text(request.form.get("region"), 120)
+        keywords_raw = _normalize_text(request.form.get("keywords"), 200)
+        if not region:
+            return render_prospects_dashboard(
+                error_message="Region is required to scrape prospects.",
+                region=region,
+                keywords=keywords_raw,
+            )
+
+        keywords = [k.strip() for k in keywords_raw.split(",") if k.strip()]
+        user_agent = f"portfolio-app/1.0 ({os.getenv('WEBSITE_URL', 'https://sqnder.dev')})"
+
+        try:
+            scraped = scrape_prospects(region=region, keywords=keywords, user_agent=user_agent)
+        except Exception as exc:
+            LOGGER.exception("Lead scraping failed: %s", exc)
+            return render_prospects_dashboard(
+                error_message="Lead scraping failed. Check logs for details.",
+                region=region,
+                keywords=keywords_raw,
+            )
+
+        added = 0
+        updated = 0
+
+        with db.session() as session:
+            for lead in scraped:
+                existing = (
+                    session.query(Prospect)
+                    .filter(Prospect.name == lead["name"], Prospect.region == lead["region"])
+                    .first()
+                )
+                if existing:
+                    existing.website = lead["website"] or existing.website
+                    existing.performance_flag = bool(lead["performance_flag"])
+                    updated += 1
+                else:
+                    session.add(
+                        Prospect(
+                            name=lead["name"],
+                            region=lead["region"],
+                            website=lead["website"],
+                            performance_flag=bool(lead["performance_flag"]),
+                            contacted_status=False,
+                        )
+                    )
+                    added += 1
+
+        if not scraped:
+            message = "No new prospects found for this region."
+        else:
+            message = f"Scrape complete. Added {added} new prospects, refreshed {updated}."
+
+        return redirect(
+            url_for(
+                "prospects_dashboard",
+                region=region,
+                keywords=keywords_raw,
+                message=message,
+            )
+        )
+
+    @app.route("/dashboard/prospects/<int:prospect_id>/contacted", methods=["POST"])
+    @require_dashboard_auth
+    def prospects_mark_contacted(prospect_id):
+        db, db_error = _get_dashboard_db_or_error()
+        if not db:
+            return render_prospects_dashboard(error_message=db_error)
+
+        contacted = (request.form.get("contacted") or "") == "1"
+        with db.session() as session:
+            prospect = session.query(Prospect).filter(Prospect.id == prospect_id).first()
+            if prospect:
+                prospect.contacted_status = contacted
+
+        return redirect(url_for("prospects_dashboard"))
+
+    @app.route("/dashboard/billing", methods=["GET"])
+    @require_dashboard_auth
+    def billing_dashboard():
+        message = (request.args.get("message") or "").strip()
+        error_message = (request.args.get("error") or "").strip()
+        return render_billing_dashboard(message=message, error_message=error_message)
+
+    @app.route("/dashboard/billing/clients", methods=["POST"])
+    @require_dashboard_auth
+    def billing_add_client():
+        db, db_error = _get_dashboard_db_or_error()
+        if not db:
+            return render_billing_dashboard(error_message=db_error)
+
+        errors = []
+        name = _normalize_text(request.form.get("name"), 200)
+        if not name:
+            errors.append("Client name is required.")
+
+        startup_cost = _parse_decimal(request.form.get("startup_cost"), "Startup cost", errors)
+        annual_fee = _parse_decimal(request.form.get("annual_fee"), "Annual fee", errors)
+        if annual_fee is None and not errors:
+            errors.append("Annual fee is required.")
+
+        renewal_date = _parse_date(
+            request.form.get("hosting_renewal_date"),
+            "Hosting renewal date",
+            errors,
+        )
+
+        if errors:
+            return render_billing_dashboard(error_message=errors[0])
+
+        with db.session() as session:
+            existing = session.query(Client).filter(Client.name == name).first()
+            if existing:
+                existing.startup_cost = startup_cost
+                existing.annual_fee = annual_fee
+                existing.hosting_renewal_date = renewal_date
+                message = "Client updated."
+            else:
+                session.add(
+                    Client(
+                        name=name,
+                        startup_cost=startup_cost,
+                        annual_fee=annual_fee,
+                        hosting_renewal_date=renewal_date,
+                    )
+                )
+                message = "Client added."
+
+        return redirect(url_for("billing_dashboard", message=message))
 
     return app
 

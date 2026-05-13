@@ -14,6 +14,7 @@ class BaseConfig:
     JSON_SORT_KEYS = False
     MAX_CONTENT_LENGTH = 1024 * 1024  # 1 MB request size limit
     DATABASE_PATH = os.getenv("DATABASE_PATH", "portfolio.db")
+    DATABASE_URL = os.getenv("DATABASE_URL", "")
     OWNER_EMAIL = os.getenv("OWNER_EMAIL", "")
     HONEYPOT_FIELD_NAME = os.getenv("HONEYPOT_FIELD_NAME", "website")
     MIN_FORM_FILL_SECONDS = int(os.getenv("MIN_FORM_FILL_SECONDS", "2"))
