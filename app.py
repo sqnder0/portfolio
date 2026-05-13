@@ -801,12 +801,19 @@ def create_app():
         if errors:
             return render_dashboard(compose=compose_data, error_message=errors[0])
 
-        plain_body = (
-            f"{payload['greeting']}\n\n"
-            f"{payload['intro_text']}\n\n"
-            f"{payload['body_text']}\n\n"
-            f"{payload['signature_name']}\n"
-            f"{payload['signature_role']}"
+        plain_body = render_template(
+            "emails/client_outreach.txt",
+            header_title=payload.get("header_title"),
+            header_subtitle=payload.get("header_subtitle"),
+            greeting=payload.get("greeting"),
+            intro_text=payload.get("intro_text"),
+            body_text=payload.get("body_text"),
+            cta_text=payload.get("cta_text"),
+            cta_url=payload.get("cta_url"),
+            signature_name=payload.get("signature_name"),
+            signature_role=payload.get("signature_role"),
+            footer_text=payload.get("footer_text"),
+            website_url=os.getenv("WEBSITE_URL", "https://sqnder.dev"),
         )
 
         mail = Email(

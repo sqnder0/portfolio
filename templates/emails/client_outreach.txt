@@ -1,0 +1,19 @@
+{{ header_title }}
+{{ header_subtitle }}
+
+{{ greeting }}
+
+{{ intro_text }}
+
+{{ body_text }}
+
+{% if cta_text and cta_url %}
+Action: {{ cta_text }} — {{ cta_url }}
+{% endif %}
+
+{{ signature_name }}
+{{ signature_role }}
+
+Visit: {{ website_url }}
+
+{% if footer_text %}{{ footer_text }}{% else %}Sent from my laptop — fueled by coffee and optimism.{% endif %}
