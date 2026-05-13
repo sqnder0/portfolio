@@ -129,59 +129,70 @@
         .footer a:hover {
             text-decoration: underline;
         }
+        .submission-timestamp {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #999;
+        }
+        .header {
+            background-color: #001129;
+            background-image: linear-gradient(135deg, #001129 0%, #0c5776 100%);
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>{{ header_title }}</h1>
-            <p>{{ header_subtitle }}</p>
+    <div class="container" style="max-width:600px; margin:0 auto; background-color:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0, 0, 0, 0.1);">
+        <div class="header" style="background-color:#001129; background-image:linear-gradient(135deg, #001129 0%, #0c5776 100%); background-repeat:no-repeat; background-size:cover; padding:40px 20px; text-align:center; color:#bcfffe;">
+            <h1 style="font-size:24px; font-weight:700; margin-bottom:10px; color:#bcfffe; margin:0;">{{ header_title }}</h1>
+            <p style="font-size:14px; opacity:0.9; color:#bcfffe; margin:0; padding:0;">{{ header_subtitle }}</p>
         </div>
 
-        <div class="content">
-            <div class="alert">
+        <div class="content" style="padding:40px 30px;">
+            <div class="alert" style="background-color:#fff3cd; border-left:4px solid #ffc107; padding:15px; margin-bottom:20px; border-radius:4px; font-size:14px; color:#856404;">
                 {{ alert_message }}
             </div>
 
-            <h2>{{ greeting }}</h2>
-            <p>{{ intro_text }}</p>
+            <h2 style="color:#001129; font-size:20px; margin-bottom:15px; margin:0 0 15px 0;">{{ greeting }}</h2>
+            <p style="font-size:16px; line-height:1.6; margin-bottom:15px; color:#555;">{{ intro_text }}</p>
 
-            <table class="details-table">
-                <tr>
-                    <td>{{ name_label }}</td>
-                    <td>{{ first_name }} {{ last_name }}</td>
+            <table class="details-table" style="width:100%; border-collapse:collapse; margin:20px 0;">
+                <tr style="border-bottom:1px solid #e0e0e0;">
+                    <td style="padding:12px; font-size:14px; font-weight:600; color:#001129; width:30%;">{{ name_label }}</td>
+                    <td style="padding:12px; font-size:14px;">{{ first_name }} {{ last_name }}</td>
                 </tr>
-                <tr>
-                    <td>{{ email_label }}</td>
-                    <td><a href="mailto:{{ email }}">{{ email }}</a></td>
+                <tr style="border-bottom:1px solid #e0e0e0;">
+                    <td style="padding:12px; font-size:14px; font-weight:600; color:#001129; width:30%;">{{ email_label }}</td>
+                    <td style="padding:12px; font-size:14px;"><a href="mailto:{{ email }}" style="color:#2d99ae; text-decoration:none;">{{ email }}</a></td>
                 </tr>
-                <tr>
-                    <td>{{ company_label }}</td>
-                    <td>{{ company }}</td>
+                <tr style="border-bottom:1px solid #e0e0e0;">
+                    <td style="padding:12px; font-size:14px; font-weight:600; color:#001129; width:30%;">{{ company_label }}</td>
+                    <td style="padding:12px; font-size:14px;">{{ company }}</td>
                 </tr>
                 {% if phone_number %}
-                <tr>
-                    <td>{{ phone_label }}</td>
-                    <td>{{ phone_number }}</td>
+                <tr style="border-bottom:none;">
+                    <td style="padding:12px; font-size:14px; font-weight:600; color:#001129; width:30%;">{{ phone_label }}</td>
+                    <td style="padding:12px; font-size:14px;">{{ phone_number }}</td>
                 </tr>
                 {% endif %}
             </table>
 
-            <div class="message-box">
-                <h3>{{ message_label }}</h3>
-                <p>{{ details }}</p>
+            <div class="message-box" style="background-color:#f9f9f9; border-left:4px solid #2d99ae; padding:20px; margin:20px 0; border-radius:4px;">
+                <h3 style="color:#2d99ae; font-size:14px; text-transform:uppercase; margin-bottom:12px; margin:0 0 12px 0;">{{ message_label }}</h3>
+                <p style="margin:0; white-space:pre-wrap; word-break:break-word;">{{ details }}</p>
             </div>
 
-            <p>{{ action_text }}</p>
-            <a href="mailto:{{ email }}" class="cta-button">{{ reply_button }}</a>
+            <p style="font-size:16px; line-height:1.6; margin-bottom:15px; color:#555;">{{ action_text }}</p>
+            <a href="mailto:{{ email }}" class="cta-button" style="display:inline-block; background-color:#2d99ae; color:#ffffff; padding:12px 30px; text-decoration:none; border-radius:4px; font-weight:600; margin:25px 0;">{{ reply_button }}</a>
 
-            <p style="margin-top: 30px; font-size: 12px; color: #999;">
+            <p class="submission-timestamp" style="margin-top:30px; font-size:12px; color:#999;">
                 {{ submitted_at }}: {{ timestamp }}
             </p>
         </div>
 
-        <div class="footer">
-            <p>{{ footer_text }}</p>
+        <div class="footer" style="background-color:#f5f5f5; padding:30px; text-align:center; border-top:1px solid #e0e0e0; font-size:12px; color:#999;">
+            <p style="margin:0;">{{ footer_text }}</p>
         </div>
     </div>
 </body>

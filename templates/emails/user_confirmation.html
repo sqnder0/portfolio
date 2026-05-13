@@ -109,53 +109,73 @@
         .signature p {
             margin: 5px 0;
         }
+        .message-details {
+            font-style: italic;
+            color: #666;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .signature-links {
+            margin-top: 10px;
+            color: #999;
+        }
+        .footer-links {
+            margin-top: 10px;
+        }
+        .header {
+            background-color: #001129;
+            background-image: linear-gradient(135deg, #001129 0%, #0c5776 100%);
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>{{ header_title }}</h1>
-            <p>{{ header_subtitle }}</p>
+    <div class="container" style="max-width:600px; margin:0 auto; background-color:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0, 0, 0, 0.1);">
+        <div class="header" style="background-color:#001129; background-image:linear-gradient(135deg, #001129 0%, #0c5776 100%); background-repeat:no-repeat; background-size:cover; padding:40px 20px; text-align:center; color:#bcfffe;">
+            <h1 style="font-size:24px; font-weight:700; margin-bottom:10px; color:#bcfffe; margin:0;">{{ header_title }}</h1>
+            <p style="font-size:14px; opacity:0.9; color:#bcfffe; margin:0; padding:0;">{{ header_subtitle }}</p>
         </div>
 
-        <div class="content">
-            <h2>{{ greeting }}</h2>
-            <p>{{ intro_text }}</p>
+        <div class="content" style="padding:40px 30px;">
+            <h2 style="color:#001129; font-size:20px; margin-bottom:15px; margin:0 0 15px 0;">{{ greeting }}</h2>
+            <p style="font-size:16px; line-height:1.6; margin-bottom:15px; color:#555;">{{ intro_text }}</p>
 
-            <div class="details-box">
-                <h3>{{ details_label }}</h3>
-                <p><strong>{{ name_label }}:</strong> {{ first_name }} {{ last_name }}</p>
-                <p><strong>{{ email_label }}:</strong> {{ email }}</p>
-                <p><strong>{{ company_label }}:</strong> {{ company }}</p>
+            <div class="details-box" style="background-color:#f9f9f9; border-left:4px solid #2d99ae; padding:20px; margin:25px 0; border-radius:4px;">
+                <h3 style="color:#2d99ae; font-size:14px; text-transform:uppercase; margin-bottom:8px; margin:0 0 8px 0;">{{ details_label }}</h3>
+                <p style="margin-bottom:8px; font-size:16px; line-height:1.6; color:#555;"><strong>{{ name_label }}:</strong> {{ first_name }} {{ last_name }}</p>
+                <p style="margin-bottom:8px; font-size:16px; line-height:1.6; color:#555;"><strong>{{ email_label }}:</strong> {{ email }}</p>
+                <p style="margin-bottom:8px; font-size:16px; line-height:1.6; color:#555;"><strong>{{ company_label }}:</strong> {{ company }}</p>
                 {% if phone_number %}
-                <p><strong>{{ phone_label }}:</strong> {{ phone_number }}</p>
+                <p style="margin-bottom:8px; font-size:16px; line-height:1.6; color:#555;"><strong>{{ phone_label }}:</strong> {{ phone_number }}</p>
                 {% endif %}
             </div>
 
-            <p>{{ message_intro }}:</p>
-            <p style="font-style: italic; color: #666; padding: 15px; background-color: #f9f9f9; border-radius: 4px;">
+            <p style="font-size:16px; line-height:1.6; margin-bottom:15px; color:#555;">{{ message_intro }}:</p>
+            <p class="message-details" style="font-style:italic; color:#666; padding:15px; background-color:#f9f9f9; border-radius:4px; margin-bottom:15px;">
                 {{ details }}
             </p>
 
-            <p>{{ closing_text }}</p>
+            <p style="font-size:16px; line-height:1.6; margin-bottom:15px; color:#555;">{{ closing_text }}</p>
 
-            <a href="{{ website_url }}" class="cta-button">{{ cta_button }}</a>
+            <a href="{{ website_url }}" class="cta-button" style="display:inline-block; background-color:#2d99ae; color:#ffffff; padding:12px 30px; text-decoration:none; border-radius:4px; font-weight:600; margin:25px 0;">{{ cta_button }}</a>
 
-            <div class="signature">
-                <p><strong>{{ best_regards }}</strong></p>
-                <p style="margin-top: 10px; color: #999;">
+            <div class="signature" style="margin-top:30px; padding-top:20px; border-top:1px solid #e0e0e0;">
+                <p style="margin:5px 0;"><strong>{{ best_regards }}</strong></p>
+                <p class="signature-links" style="margin-top:10px; color:#999; margin-bottom:0;">
                     Sander Pelgrims<br>
                     Full-Stack Web Developer<br>
-                    <a href="{{ website_url }}">{{ website_url }}</a>
+                    <a href="{{ website_url }}" style="color:#2d99ae; text-decoration:none;">{{ website_url }}</a>
                 </p>
             </div>
         </div>
 
-        <div class="footer">
-            <p>{{ footer_text }}</p>
-            <p style="margin-top: 10px;">
-                <a href="{{ website_url }}">{{ visit_website }}</a> | 
-                <a href="{{ website_url }}#contact">{{ contact_us }}</a>
+        <div class="footer" style="background-color:#f5f5f5; padding:30px; text-align:center; border-top:1px solid #e0e0e0; font-size:12px; color:#999;">
+            <p style="margin:0;">{{ footer_text }}</p>
+            <p class="footer-links" style="margin-top:10px; margin-bottom:0;">
+                <a href="{{ website_url }}" style="color:#2d99ae; text-decoration:none;">{{ visit_website }}</a> | 
+                <a href="{{ website_url }}#contact" style="color:#2d99ae; text-decoration:none;">{{ contact_us }}</a>
             </p>
         </div>
     </div>
