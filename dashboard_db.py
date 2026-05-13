@@ -64,4 +64,11 @@ def build_dashboard_db_from_env():
     database_url = os.getenv("DATABASE_URL", "").strip()
     if not database_url:
         return None
+
+    # Ensure Postgres URLs use the installed SQLAlchemy psycopg driver.
+    if database_url.startswith("postgres://"):
+        database_url = "postgresql+psycopg://" + database_url[len("postgres://") :]
+    elif database_url.startswith("postgresql://") and not database_url.startswith("postgresql+"):
+        database_url = "postgresql+psycopg://" + database_url[len("postgresql://") :]
+
     return DashboardDatabase(database_url)
