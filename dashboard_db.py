@@ -42,7 +42,13 @@ class DashboardDatabase:
             raise ValueError("DATABASE_URL is required")
         self.database_url = database_url
         self.engine = create_engine(database_url, pool_pre_ping=True, future=True)
-        self.SessionLocal = sessionmaker(bind=self.engine, autoflush=False, autocommit=False, future=True)
+        self.SessionLocal = sessionmaker(
+            bind=self.engine,
+            autoflush=False,
+            autocommit=False,
+            expire_on_commit=False,
+            future=True,
+        )
 
     def create_tables(self):
         Base.metadata.create_all(self.engine)
