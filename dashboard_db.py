@@ -13,6 +13,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     create_engine,
+    text,
 )
 from sqlalchemy.orm import declarative_base, sessionmaker
 
@@ -28,6 +29,7 @@ class Prospect(Base):
     website = Column(String(300), nullable=True)
     performance_flag = Column(Boolean, nullable=False, default=False)
     contacted_status = Column(Boolean, nullable=False, default=False)
+    not_interesting = Column(Boolean, nullable=False, default=False)
 
     __table_args__ = (
         UniqueConstraint("name", "region", name="uq_prospect_name_region"),
@@ -160,7 +162,22 @@ class DashboardDatabase:
 
     def create_tables(self):
         Base.metadata.create_all(self.engine)
+        self._apply_schema_patches()
         self._seed_tools()
+
+    def _apply_schema_patches(self):
+        # Base.metadata.create_all only creates missing tables, not columns added
+        # to models after a table already exists in a deployed database.
+        try:
+            with self.engine.begin() as conn:
+                conn.execute(
+                    text(
+                        "ALTER TABLE prospects "
+                        "ADD COLUMN IF NOT EXISTS not_interesting BOOLEAN NOT NULL DEFAULT FALSE"
+                    )
+                )
+        except Exception:
+            pass
 
     def _seed_tools(self):
         with self.session() as session:

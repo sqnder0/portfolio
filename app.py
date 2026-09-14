@@ -439,6 +439,8 @@ def create_app():
             error_message = db_error
         return render_template(
             "email_dashboard.html",
+            page_title="Email Desk",
+            active_page="emails",
             compose=compose_data,
             clients=store.list_clients(),
             drafts=store.list_drafts(),
@@ -474,7 +476,7 @@ def create_app():
             )
         return db, error_message
 
-    def _load_prospects(db, region_filter="", flag_filter="", contacted_filter=""):
+    def _load_prospects(db, region_filter="", flag_filter="", contacted_filter="", interest_filter=""):
         with db.session() as session:
             all_regions = [
                 r[0] for r in session.query(Prospect.region).distinct().order_by(Prospect.region.asc()).all()
@@ -491,8 +493,13 @@ def create_app():
                 query = query.filter(Prospect.contacted_status.is_(True))
             elif contacted_filter == "not_contacted":
                 query = query.filter(Prospect.contacted_status.is_(False))
+            if interest_filter == "not_interesting":
+                query = query.filter(Prospect.not_interesting.is_(True))
+            elif interest_filter == "interesting":
+                query = query.filter(Prospect.not_interesting.is_(False))
 
             rows = query.order_by(
+                Prospect.not_interesting.asc(),
                 Prospect.contacted_status.asc(),
                 Prospect.performance_flag.desc(),
                 Prospect.name.asc(),
@@ -511,6 +518,7 @@ def create_app():
                     "website": row.website or "",
                     "performance_flag": bool(row.performance_flag),
                     "contacted_status": bool(row.contacted_status),
+                    "not_interesting": bool(row.not_interesting),
                 }
             )
 
@@ -518,6 +526,7 @@ def create_app():
             "total": len(all_rows),
             "flagged": sum(1 for r in all_rows if r.performance_flag),
             "contacted": sum(1 for r in all_rows if r.contacted_status),
+            "not_interesting": sum(1 for r in all_rows if r.not_interesting),
         }
         return leads, stats, all_regions
 
@@ -568,10 +577,11 @@ def create_app():
         filter_region="",
         filter_flag="",
         filter_contacted="",
+        filter_interest="",
     ):
         db, db_error = _get_dashboard_db_or_error()
         leads = []
-        stats = {"total": 0, "flagged": 0, "contacted": 0}
+        stats = {"total": 0, "flagged": 0, "contacted": 0, "not_interesting": 0}
         all_regions = []
 
         if db:
@@ -580,6 +590,7 @@ def create_app():
                 region_filter=filter_region,
                 flag_filter=filter_flag,
                 contacted_filter=filter_contacted,
+                interest_filter=filter_interest,
             )
 
         if db_error and not error_message:
@@ -597,6 +608,7 @@ def create_app():
             filter_region=filter_region,
             filter_flag=filter_flag,
             filter_contacted=filter_contacted,
+            filter_interest=filter_interest,
             message=message,
             error_message=error_message,
         )
@@ -1093,6 +1105,7 @@ def create_app():
         filter_region = _normalize_text(request.args.get("filter_region"), 120)
         filter_flag = (request.args.get("filter_flag") or "").strip()
         filter_contacted = (request.args.get("filter_contacted") or "").strip()
+        filter_interest = (request.args.get("filter_interest") or "").strip()
         return render_prospects_dashboard(
             message=message,
             error_message=error_message,
@@ -1101,6 +1114,7 @@ def create_app():
             filter_region=filter_region,
             filter_flag=filter_flag,
             filter_contacted=filter_contacted,
+            filter_interest=filter_interest,
         )
 
     @app.route("/dashboard/prospects/scrape", methods=["POST"])
@@ -1154,6 +1168,7 @@ def create_app():
                             website=lead["website"],
                             performance_flag=bool(lead["performance_flag"]),
                             contacted_status=False,
+                            not_interesting=False,
                         )
                     )
                     added += 1
@@ -1172,18 +1187,20 @@ def create_app():
             )
         )
 
-    @app.route("/dashboard/prospects/<int:prospect_id>/contacted", methods=["POST"])
+    @app.route("/dashboard/prospects/<int:prospect_id>/status", methods=["POST"])
     @require_dashboard_auth
-    def prospects_mark_contacted(prospect_id):
+    def prospects_update_status(prospect_id):
         db, db_error = _get_dashboard_db_or_error()
         if not db:
             return render_prospects_dashboard(error_message=db_error)
 
         contacted = (request.form.get("contacted") or "") == "1"
+        not_interesting = (request.form.get("not_interesting") or "") == "1"
         with db.session() as session:
             prospect = session.query(Prospect).filter(Prospect.id == prospect_id).first()
             if prospect:
                 prospect.contacted_status = contacted
+                prospect.not_interesting = not_interesting
 
         return redirect(
             url_for(
@@ -1191,6 +1208,7 @@ def create_app():
                 filter_region=request.form.get("filter_region", ""),
                 filter_flag=request.form.get("filter_flag", ""),
                 filter_contacted=request.form.get("filter_contacted", ""),
+                filter_interest=request.form.get("filter_interest", ""),
             )
         )
 

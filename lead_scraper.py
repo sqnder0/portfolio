@@ -1,5 +1,6 @@
 import json
 import logging
+import time
 from urllib import error, parse, request
 from urllib.parse import urlparse
 
@@ -106,11 +107,15 @@ def scrape_prospects(region, keywords=None, max_results=40, user_agent="portfoli
     results = []
     seen = set()
 
-    for keyword in keywords:
+    for index, keyword in enumerate(keywords):
+        if index > 0:
+            # Nominatim's usage policy caps public requests at ~1/second.
+            time.sleep(1)
+
         query = f"{keyword} {region}"
         try:
             payload = _fetch_nominatim(query, limit=10, user_agent=user_agent)
-        except (error.HTTPError, error.URLError, ValueError) as exc:
+        except (error.HTTPError, error.URLError, TimeoutError, ValueError) as exc:
             LOGGER.warning("Lead scrape failed for %s: %s", query, exc)
             continue
 

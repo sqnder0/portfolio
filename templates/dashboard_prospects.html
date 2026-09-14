@@ -1,7 +1,7 @@
 {% extends "dashboard_base.html" %}
 
 {% block content %}
-<section class="grid gap-4 md:grid-cols-3">
+<section class="grid gap-4 md:grid-cols-4">
     <div class="rounded-2xl border border-line bg-panel p-5 shadow-lg">
         <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Total Leads</p>
         <p class="mt-3 text-3xl font-semibold text-white">{{ stats.total }}</p>
@@ -16,6 +16,11 @@
         <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Contacted</p>
         <p class="mt-3 text-3xl font-semibold text-white">{{ stats.contacted }}</p>
         <p class="mt-2 text-sm text-slate-400">Follow-ups already in motion.</p>
+    </div>
+    <div class="rounded-2xl border border-line bg-panel p-5 shadow-lg">
+        <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Not Interesting</p>
+        <p class="mt-3 text-3xl font-semibold text-white">{{ stats.not_interesting }}</p>
+        <p class="mt-2 text-sm text-slate-400">Flagged out of the pipeline.</p>
     </div>
 </section>
 
@@ -110,13 +115,25 @@
                     <option value="contacted" {% if filter_contacted == "contacted" %}selected{% endif %}>Contacted</option>
                 </select>
             </div>
+            <div>
+                <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="filter_interest">Interest</label>
+                <select
+                    class="mt-2 rounded-xl border border-slate-400/70 bg-slate-900/80 px-3 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                    id="filter_interest"
+                    name="filter_interest"
+                >
+                    <option value="" {% if not filter_interest %}selected{% endif %}>Any</option>
+                    <option value="interesting" {% if filter_interest == "interesting" %}selected{% endif %}>Hide not interesting</option>
+                    <option value="not_interesting" {% if filter_interest == "not_interesting" %}selected{% endif %}>Only not interesting</option>
+                </select>
+            </div>
             <button
                 class="rounded-xl border border-line px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-accent hover:text-white"
                 type="submit"
             >
                 Apply filters
             </button>
-            {% if filter_region or filter_flag or filter_contacted %}
+            {% if filter_region or filter_flag or filter_contacted or filter_interest %}
             <a
                 class="text-xs text-slate-400 underline decoration-dotted hover:text-white"
                 href="/dashboard/prospects"
@@ -133,13 +150,13 @@
                         <th class="pb-3">Lead</th>
                         <th class="pb-3">Website</th>
                         <th class="pb-3">Flag</th>
-                        <th class="pb-3">Contacted</th>
+                        <th class="pb-3">Status</th>
                         <th class="pb-3">Outreach</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-line text-slate-200">
                     {% for lead in leads %}
-                    <tr class="align-top">
+                    <tr class="align-top {% if lead.not_interesting %}opacity-50{% endif %}">
                         <td class="py-4">
                             <p class="font-medium text-white">{{ lead.name }}</p>
                             <p class="mt-1 text-xs text-slate-400">{{ lead.region }}</p>
@@ -169,13 +186,19 @@
                                 Looks solid
                             </span>
                             {% endif %}
+                            {% if lead.not_interesting %}
+                            <span class="mt-2 inline-block rounded-full border border-line bg-slate-800 px-3 py-1 text-xs text-slate-400">
+                                Not interesting
+                            </span>
+                            {% endif %}
                         </td>
                         <td class="py-4">
-                            <form method="POST" action="/dashboard/prospects/{{ lead.id }}/contacted" class="space-y-2">
+                            <form method="POST" action="/dashboard/prospects/{{ lead.id }}/status" class="space-y-2">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                 <input type="hidden" name="filter_region" value="{{ filter_region }}" />
                                 <input type="hidden" name="filter_flag" value="{{ filter_flag }}" />
                                 <input type="hidden" name="filter_contacted" value="{{ filter_contacted }}" />
+                                <input type="hidden" name="filter_interest" value="{{ filter_interest }}" />
                                 <label class="flex items-center gap-2 text-xs text-slate-300">
                                     <input
                                         type="checkbox"
@@ -184,7 +207,17 @@
                                         class="h-4 w-4 rounded border-line bg-slateBlue text-accent focus:ring-accent"
                                         {% if lead.contacted_status %}checked{% endif %}
                                     />
-                                    Marked
+                                    Contacted
+                                </label>
+                                <label class="flex items-center gap-2 text-xs text-slate-300">
+                                    <input
+                                        type="checkbox"
+                                        name="not_interesting"
+                                        value="1"
+                                        class="h-4 w-4 rounded border-line bg-slateBlue text-danger focus:ring-danger"
+                                        {% if lead.not_interesting %}checked{% endif %}
+                                    />
+                                    Not interesting
                                 </label>
                                 <button
                                     class="rounded-lg border border-line px-3 py-1 text-xs text-slate-300 transition hover:border-accent hover:text-white"
@@ -226,26 +259,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-document.addEventListener("click", function (event) {
-    const btn = event.target.closest(".copy-lead-btn");
-    if (!btn) return;
-
-    const lines = [
-        "Business: " + (btn.dataset.name || ""),
-        "Region: " + (btn.dataset.region || ""),
-        "Website: " + (btn.dataset.website || "None listed"),
-        "Site assessment: " + (btn.dataset.flag || ""),
-    ];
-    const text = lines.join("\n");
-
-    navigator.clipboard.writeText(text).then(function () {
-        const original = btn.textContent;
-        btn.textContent = "Copied!";
-        setTimeout(function () {
-            btn.textContent = original;
-        }, 1500);
-    });
-});
-</script>
+<script src="/dashboard-prospects.js"></script>
 {% endblock %}
