@@ -127,6 +127,12 @@ def scrape_prospects(region, keywords=None, max_results=40, user_agent="portfoli
             if not name:
                 continue
 
+            # Collapse repeated whitespace in the stored name itself (not
+            # just the dedupe key) so a name persisted from one query
+            # reliably matches the same, differently-spaced name variant
+            # from another query or a later re-scrape.
+            name = " ".join(name.split())
+
             dedupe_key = (name.lower(), region.lower())
             if dedupe_key in seen:
                 continue
@@ -142,6 +148,7 @@ def scrape_prospects(region, keywords=None, max_results=40, user_agent="portfoli
                     "region": region,
                     "website": website,
                     "performance_flag": performance_flag,
+                    "category": keyword,
                 }
             )
             seen.add(dedupe_key)

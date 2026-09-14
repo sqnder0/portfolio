@@ -19,6 +19,7 @@ from flask import (
     url_for,
 )
 from flask_wtf.csrf import CSRFProtect
+from sqlalchemy import func
 
 from config import config_by_name
 from dashboard_db import Client, Prospect, build_dashboard_db_from_env
@@ -516,6 +517,7 @@ def create_app():
                     "name": row.name,
                     "region": row.region,
                     "website": row.website or "",
+                    "category": row.category or "",
                     "performance_flag": bool(row.performance_flag),
                     "contacted_status": bool(row.contacted_status),
                     "not_interesting": bool(row.not_interesting),
@@ -1146,19 +1148,32 @@ def create_app():
                 keywords=keywords_raw,
             )
 
+        # Collapse near-duplicate leads (same business, different casing/
+        # whitespace across OSM elements or keyword queries) before they
+        # ever reach the database, keeping the first occurrence of each.
+        deduped_leads = {}
+        for lead in scraped:
+            key = (" ".join(lead["name"].strip().lower().split()), lead["region"].strip().lower())
+            deduped_leads.setdefault(key, lead)
+
         added = 0
         updated = 0
 
         with db.session() as session:
-            for lead in scraped:
+            for lead in deduped_leads.values():
+                normalized_name = " ".join(lead["name"].strip().lower().split())
                 existing = (
                     session.query(Prospect)
-                    .filter(Prospect.name == lead["name"], Prospect.region == lead["region"])
+                    .filter(
+                        func.lower(Prospect.name) == normalized_name,
+                        Prospect.region == lead["region"],
+                    )
                     .first()
                 )
                 if existing:
                     existing.website = lead["website"] or existing.website
                     existing.performance_flag = bool(lead["performance_flag"])
+                    existing.category = lead.get("category") or existing.category
                     updated += 1
                 else:
                     session.add(
@@ -1166,6 +1181,7 @@ def create_app():
                             name=lead["name"],
                             region=lead["region"],
                             website=lead["website"],
+                            category=lead.get("category"),
                             performance_flag=bool(lead["performance_flag"]),
                             contacted_status=False,
                             not_interesting=False,

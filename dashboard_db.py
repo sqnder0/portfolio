@@ -27,6 +27,7 @@ class Prospect(Base):
     name = Column(String(200), nullable=False)
     region = Column(String(120), nullable=False)
     website = Column(String(300), nullable=True)
+    category = Column(String(120), nullable=True)
     performance_flag = Column(Boolean, nullable=False, default=False)
     contacted_status = Column(Boolean, nullable=False, default=False)
     not_interesting = Column(Boolean, nullable=False, default=False)
@@ -175,6 +176,9 @@ class DashboardDatabase:
                         "ALTER TABLE prospects "
                         "ADD COLUMN IF NOT EXISTS not_interesting BOOLEAN NOT NULL DEFAULT FALSE"
                     )
+                )
+                conn.execute(
+                    text("ALTER TABLE prospects ADD COLUMN IF NOT EXISTS category VARCHAR(120)")
                 )
         except Exception:
             pass
