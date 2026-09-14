@@ -1,477 +1,346 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Client Email Dashboard</title>
-    <style>
-        :root {
-            --bg: #f2f6fb;
-            --panel: #ffffff;
-            --ink: #0d1b2a;
-            --muted: #5f6f81;
-            --line: #dce5ef;
-            --accent: #0c5776;
-            --accent-strong: #063749;
-            --ok-bg: #e7f8ef;
-            --ok-ink: #17603a;
-            --err-bg: #fdeaea;
-            --err-ink: #8f2222;
-        }
+{% extends "dashboard_base.html" %}
 
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            background:
-                radial-gradient(circle at 10% 10%, #d8e9f8 0%, transparent 40%),
-                radial-gradient(circle at 90% 90%, #d8f3ef 0%, transparent 35%),
-                var(--bg);
-            color: var(--ink);
-            min-height: 100vh;
-            padding: 28px;
-        }
-
-        .wrap {
-            max-width: 1280px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 340px minmax(0, 1fr);
-            gap: 20px;
-        }
-
-        .panel {
-            background: var(--panel);
-            border: 1px solid var(--line);
-            border-radius: 14px;
-            box-shadow: 0 10px 24px rgba(11, 31, 53, 0.08);
-        }
-
-        .panel-head {
-            padding: 16px 18px;
-            border-bottom: 1px solid var(--line);
-        }
-
-        .panel-head h2,
-        .panel-head h1 {
-            margin: 0;
-            font-size: 18px;
-            line-height: 1.3;
-        }
-
-        .panel-head p {
-            margin: 6px 0 0;
-            color: var(--muted);
-            font-size: 13px;
-        }
-
-        .panel-body {
-            padding: 16px 18px 18px;
-        }
-
-        .left-column {
-            display: grid;
-            gap: 16px;
-            align-content: start;
-        }
-
-        .main-column {
-            display: grid;
-            gap: 16px;
-            align-content: start;
-        }
-
-        .status {
-            margin-bottom: 12px;
-            padding: 12px 14px;
-            border-radius: 10px;
-            font-size: 14px;
-            border: 1px solid transparent;
-        }
-
-        .status.ok {
-            background: var(--ok-bg);
-            border-color: #b9e4c8;
-            color: var(--ok-ink);
-        }
-
-        .status.error {
-            background: var(--err-bg);
-            border-color: #f0bcbc;
-            color: var(--err-ink);
-        }
-
-        .field-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .field {
-            display: grid;
-            gap: 6px;
-            margin-bottom: 12px;
-        }
-
-        .field.full {
-            grid-column: 1 / -1;
-        }
-
-        label {
-            font-size: 12px;
-            color: var(--muted);
-            font-weight: 600;
-            letter-spacing: 0.02em;
-            text-transform: uppercase;
-        }
-
-        input,
-        select,
-        textarea {
-            width: 100%;
-            border: 1px solid #c7d4e3;
-            border-radius: 10px;
-            padding: 10px 12px;
-            font: inherit;
-            color: var(--ink);
-            background: #fff;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 110px;
-        }
-
-        input:focus,
-        select:focus,
-        textarea:focus {
-            outline: 2px solid #9fcde0;
-            outline-offset: 0;
-            border-color: #8bbdce;
-        }
-
-        .actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 8px;
-        }
-
-        button {
-            border: 0;
-            border-radius: 10px;
-            padding: 10px 14px;
-            font: inherit;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: #fff;
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-strong);
-        }
-
-        .btn-secondary {
-            background: #edf3f9;
-            color: #2a4259;
-            border: 1px solid #d0dce8;
-        }
-
-        .btn-danger {
-            background: #fff5f5;
-            color: #8f2222;
-            border: 1px solid #efc2c2;
-        }
-
-        .client-list,
-        .draft-list,
-        .sent-list {
-            margin: 0;
-            padding: 0;
-            list-style: none;
-            display: grid;
-            gap: 10px;
-        }
-
-        .list-card {
-            border: 1px solid var(--line);
-            border-radius: 10px;
-            padding: 10px;
-            background: #fbfdff;
-        }
-
-        .list-card h4,
-        .list-card p {
-            margin: 0;
-        }
-
-        .list-card h4 {
-            font-size: 14px;
-        }
-
-        .list-card p {
-            margin-top: 4px;
-            font-size: 12px;
-            color: var(--muted);
-            line-height: 1.4;
-            word-break: break-word;
-        }
-
-        .list-card a {
-            color: var(--accent);
-            font-size: 12px;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .preview-frame {
-            width: 100%;
-            min-height: 560px;
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            background: #fff;
-        }
-
-        .mono {
-            font-family: "Consolas", "Monaco", monospace;
-            font-size: 12px;
-        }
-
-        @media (max-width: 1024px) {
-            .wrap {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="wrap">
-        <aside class="left-column">
-            <section class="panel">
-                <div class="panel-head">
-                    <h2>Clients</h2>
-                    <p>Add or update recipients for quick selection while composing.</p>
-                </div>
-                <div class="panel-body">
-                    <form method="POST" action="/dashboard/emails/clients">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                        <div class="field">
-                            <label for="client_name">Full Name</label>
-                            <input id="client_name" name="full_name" required />
-                        </div>
-                        <div class="field">
-                            <label for="client_email">Email</label>
-                            <input id="client_email" name="email" type="email" required />
-                        </div>
-                        <div class="field">
-                            <label for="client_company">Company</label>
-                            <input id="client_company" name="company" />
-                        </div>
-                        <button class="btn-primary" type="submit">Save Client</button>
-                    </form>
-
-                    <hr style="border:0;border-top:1px solid var(--line);margin:16px 0;" />
-
-                    <ul class="client-list">
-                        {% for client in clients %}
-                        <li class="list-card">
-                            <h4>{{ client.full_name }}</h4>
-                            <p>{{ client.email }}</p>
-                            {% if client.company %}
-                            <p>{{ client.company }}</p>
-                            {% endif %}
-                        </li>
-                        {% else %}
-                        <li class="list-card">
-                            <p>No clients yet.</p>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </section>
-
-            <section class="panel">
-                <div class="panel-head">
-                    <h2>Drafts</h2>
-                    <p>Open an existing draft or remove old versions.</p>
-                </div>
-                <div class="panel-body">
-                    <ul class="draft-list">
-                        {% for draft in drafts %}
-                        <li class="list-card">
-                            <div class="row">
-                                <h4>{{ draft.subject }}</h4>
-                                <a href="/dashboard/emails?draft={{ draft.id }}">Open</a>
-                            </div>
-                            <p>{{ draft.recipient_name }} · {{ draft.recipient_email }}</p>
-                            <p class="mono">Updated: {{ draft.updated_at }}</p>
-                            <form method="POST" action="/dashboard/emails/drafts/{{ draft.id }}/delete" style="margin-top:8px;">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                                <button class="btn-danger" type="submit">Delete</button>
-                            </form>
-                        </li>
-                        {% else %}
-                        <li class="list-card">
-                            <p>No drafts saved.</p>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </section>
-        </aside>
-
-        <main class="main-column">
-            <section class="panel">
-                <div class="panel-head">
-                    <h1>Email Manager</h1>
-                    <p>Compose, preview, save, and send with your standardized portfolio email markup.</p>
-                </div>
-                <div class="panel-body">
-                    {% if message %}
-                    <div class="status ok">{{ message }}</div>
-                    {% endif %}
-                    {% if error_message %}
-                    <div class="status error">{{ error_message }}</div>
-                    {% endif %}
-
-                    <form method="POST" action="/dashboard/emails/drafts/save">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                        <input type="hidden" name="draft_id" value="{{ compose.draft_id }}" />
-
-                        <div class="field-grid">
-                            <div class="field full">
-                                <label for="client_id">Client From Address Book</label>
-                                <select id="client_id" name="client_id">
-                                    <option value="">Choose a saved client or type manually</option>
-                                    {% for client in clients %}
-                                    <option value="{{ client.id }}" {% if compose.client_id|string == client.id|string %}selected{% endif %}>
-                                        {{ client.full_name }} - {{ client.email }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-
-                            <div class="field">
-                                <label for="recipient_name">Recipient Name</label>
-                                <input id="recipient_name" name="recipient_name" value="{{ compose.recipient_name }}" required />
-                            </div>
-                            <div class="field">
-                                <label for="recipient_email">Recipient Email</label>
-                                <input id="recipient_email" name="recipient_email" type="email" value="{{ compose.recipient_email }}" required />
-                            </div>
-
-                            <div class="field full">
-                                <label for="subject">Subject</label>
-                                <input id="subject" name="subject" value="{{ compose.subject }}" required />
-                            </div>
-
-                            <div class="field">
-                                <label for="header_title">Header Title</label>
-                                <input id="header_title" name="header_title" value="{{ compose.header_title }}" required />
-                            </div>
-                            <div class="field">
-                                <label for="header_subtitle">Header Subtitle</label>
-                                <input id="header_subtitle" name="header_subtitle" value="{{ compose.header_subtitle }}" required />
-                            </div>
-
-                            <div class="field full">
-                                <label for="greeting">Greeting</label>
-                                <input id="greeting" name="greeting" value="{{ compose.greeting }}" required />
-                            </div>
-
-                            <div class="field full">
-                                <label for="intro_text">Intro Text</label>
-                                <textarea id="intro_text" name="intro_text" required>{{ compose.intro_text }}</textarea>
-                            </div>
-
-                            <div class="field full">
-                                <label for="body_text">Body Content</label>
-                                <textarea id="body_text" name="body_text" style="min-height:180px" required>{{ compose.body_text }}</textarea>
-                            </div>
-
-                            <div class="field">
-                                <label for="cta_text">CTA Button Text</label>
-                                <input id="cta_text" name="cta_text" value="{{ compose.cta_text }}" />
-                            </div>
-                            <div class="field">
-                                <label for="cta_url">CTA URL</label>
-                                <input id="cta_url" name="cta_url" value="{{ compose.cta_url }}" />
-                            </div>
-
-                            <div class="field">
-                                <label for="signature_name">Signature Name</label>
-                                <input id="signature_name" name="signature_name" value="{{ compose.signature_name }}" required />
-                            </div>
-                            <div class="field">
-                                <label for="signature_role">Signature Role</label>
-                                <input id="signature_role" name="signature_role" value="{{ compose.signature_role }}" />
-                            </div>
-                            <div class="field full">
-                                <label for="footer_text">Footer (small)</label>
-                                <textarea id="footer_text" name="footer_text" style="min-height:60px">{{ compose.footer_text }}</textarea>
-                            </div>
-                        </div>
-
-                        <div class="actions">
-                            <button class="btn-secondary" type="submit">Save Draft</button>
-                            <button class="btn-secondary" type="submit" formaction="/dashboard/emails/preview">Preview</button>
-                            <button class="btn-primary" type="submit" formaction="/dashboard/emails/send">Send Email</button>
-                        </div>
-                    </form>
-                </div>
-            </section>
-
-            <section class="panel">
-                <div class="panel-head">
-                    <h2>Markup Preview</h2>
-                    <p>This preview is rendered with the same HTML template used in outgoing messages.</p>
-                </div>
-                <div class="panel-body">
-                    {% if preview_html %}
-                    <iframe class="preview-frame" srcdoc="{{ preview_html|e }}"></iframe>
-                    {% else %}
-                    <p style="margin:0;color:var(--muted);">Use Preview or Save Draft to generate a live email render.</p>
-                    {% endif %}
-                </div>
-            </section>
-
-            <section class="panel">
-                <div class="panel-head">
-                    <h2>Sent Email History</h2>
-                    <p>Latest outbound messages sent from this dashboard.</p>
-                </div>
-                <div class="panel-body">
-                    <ul class="sent-list">
-                        {% for email in sent_emails %}
-                        <li class="list-card">
-                            <h4>{{ email.subject }}</h4>
-                            <p>{{ email.recipient_name }} · {{ email.recipient_email }}</p>
-                            <p class="mono">Sent: {{ email.sent_at }}</p>
-                        </li>
-                        {% else %}
-                        <li class="list-card">
-                            <p>No emails sent yet from this panel.</p>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </section>
-        </main>
+{% block content %}
+<section class="grid gap-4 md:grid-cols-3">
+    <div class="rounded-2xl border border-line bg-panel p-5 shadow-lg">
+        <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Clients</p>
+        <p class="mt-3 text-3xl font-semibold text-white">{{ clients|length }}</p>
+        <p class="mt-2 text-sm text-slate-400">Saved in your address book.</p>
     </div>
-</body>
-</html>
+    <div class="rounded-2xl border border-line bg-panel p-5 shadow-lg">
+        <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Drafts</p>
+        <p class="mt-3 text-3xl font-semibold text-white">{{ drafts|length }}</p>
+        <p class="mt-2 text-sm text-slate-400">In progress, not yet sent.</p>
+    </div>
+    <div class="rounded-2xl border border-line bg-panel p-5 shadow-lg">
+        <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Sent</p>
+        <p class="mt-3 text-3xl font-semibold text-white">{{ sent_emails|length }}</p>
+        <p class="mt-2 text-sm text-slate-400">Outbound from this desk.</p>
+    </div>
+</section>
+
+<section class="grid gap-6 lg:grid-cols-[1.1fr_2fr]">
+    <div class="grid content-start gap-6">
+        <div class="rounded-3xl border border-line bg-panelStrong p-6 shadow-lg">
+            <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Address Book</p>
+            <h2 class="mt-2 text-xl font-semibold text-white">Clients</h2>
+            <p class="mt-2 text-sm text-slate-400">Add or update recipients for quick selection while composing.</p>
+
+            <form class="mt-6 space-y-4" method="POST" action="/dashboard/emails/clients">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <div>
+                    <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="client_name">Full name</label>
+                    <input
+                        class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 placeholder:text-slate-300 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                        id="client_name"
+                        name="full_name"
+                        required
+                    />
+                </div>
+                <div>
+                    <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="client_email">Email</label>
+                    <input
+                        class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 placeholder:text-slate-300 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                        id="client_email"
+                        name="email"
+                        type="email"
+                        required
+                    />
+                </div>
+                <div>
+                    <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="client_company">Company</label>
+                    <input
+                        class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 placeholder:text-slate-300 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                        id="client_company"
+                        name="company"
+                    />
+                </div>
+                <button
+                    class="w-full rounded-xl bg-accentDeep px-4 py-2 text-sm font-semibold text-white shadow-glow transition hover:bg-accent"
+                    type="submit"
+                >
+                    Save Client
+                </button>
+            </form>
+
+            <ul class="mt-6 grid gap-3">
+                {% for client in clients %}
+                <li class="rounded-xl border border-line bg-panel p-3">
+                    <p class="text-sm font-medium text-white">{{ client.full_name }}</p>
+                    <p class="mt-1 text-xs text-slate-400">{{ client.email }}</p>
+                    {% if client.company %}
+                    <p class="mt-1 text-xs text-slate-500">{{ client.company }}</p>
+                    {% endif %}
+                </li>
+                {% else %}
+                <li class="rounded-xl border border-line bg-panel p-3">
+                    <p class="text-xs text-slate-400">No clients yet.</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="rounded-3xl border border-line bg-panelStrong p-6 shadow-lg">
+            <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Saved Work</p>
+            <h2 class="mt-2 text-xl font-semibold text-white">Drafts</h2>
+            <p class="mt-2 text-sm text-slate-400">Open an existing draft or remove old versions.</p>
+
+            <ul class="mt-6 grid gap-3">
+                {% for draft in drafts %}
+                <li class="rounded-xl border border-line bg-panel p-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <p class="text-sm font-medium text-white">{{ draft.subject }}</p>
+                        <a class="text-xs font-semibold text-accent hover:text-white" href="/dashboard/emails?draft={{ draft.id }}">Open</a>
+                    </div>
+                    <p class="mt-1 text-xs text-slate-400">{{ draft.recipient_name }} · {{ draft.recipient_email }}</p>
+                    <p class="mt-1 font-mono text-xs text-slate-500">Updated: {{ draft.updated_at }}</p>
+                    <form class="mt-2" method="POST" action="/dashboard/emails/drafts/{{ draft.id }}/delete">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <button
+                            class="rounded-lg border border-red-400/40 bg-red-400/10 px-3 py-1 text-xs text-red-100 transition hover:border-red-400"
+                            type="submit"
+                        >
+                            Delete
+                        </button>
+                    </form>
+                </li>
+                {% else %}
+                <li class="rounded-xl border border-line bg-panel p-3">
+                    <p class="text-xs text-slate-400">No drafts saved.</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="grid content-start gap-6">
+        <div class="rounded-3xl border border-line bg-panel p-6 shadow-lg">
+            <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Compose</p>
+            <h2 class="mt-2 text-xl font-semibold text-white">Email Manager</h2>
+            <p class="mt-2 text-sm text-slate-400">Compose, preview, save, and send with your standardized portfolio email markup.</p>
+
+            <form class="mt-6 space-y-4" method="POST" action="/dashboard/emails/drafts/save">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <input type="hidden" name="draft_id" value="{{ compose.draft_id }}" />
+
+                <div>
+                    <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="client_id">Client from address book</label>
+                    <select
+                        class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                        id="client_id"
+                        name="client_id"
+                    >
+                        <option value="">Choose a saved client or type manually</option>
+                        {% for client in clients %}
+                        <option value="{{ client.id }}" {% if compose.client_id|string == client.id|string %}selected{% endif %}>
+                            {{ client.full_name }} - {{ client.email }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2">
+                    <div>
+                        <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="recipient_name">Recipient name</label>
+                        <input
+                            class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                            id="recipient_name"
+                            name="recipient_name"
+                            value="{{ compose.recipient_name }}"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="recipient_email">Recipient email</label>
+                        <input
+                            class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                            id="recipient_email"
+                            name="recipient_email"
+                            type="email"
+                            value="{{ compose.recipient_email }}"
+                            required
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="subject">Subject</label>
+                    <input
+                        class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                        id="subject"
+                        name="subject"
+                        value="{{ compose.subject }}"
+                        required
+                    />
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2">
+                    <div>
+                        <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="header_title">Header title</label>
+                        <input
+                            class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                            id="header_title"
+                            name="header_title"
+                            value="{{ compose.header_title }}"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="header_subtitle">Header subtitle</label>
+                        <input
+                            class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                            id="header_subtitle"
+                            name="header_subtitle"
+                            value="{{ compose.header_subtitle }}"
+                            required
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="greeting">Greeting</label>
+                    <input
+                        class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                        id="greeting"
+                        name="greeting"
+                        value="{{ compose.greeting }}"
+                        required
+                    />
+                </div>
+
+                <div>
+                    <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="intro_text">Intro text</label>
+                    <textarea
+                        class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                        id="intro_text"
+                        name="intro_text"
+                        rows="3"
+                        required
+                    >{{ compose.intro_text }}</textarea>
+                </div>
+
+                <div>
+                    <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="body_text">Body content</label>
+                    <textarea
+                        class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                        id="body_text"
+                        name="body_text"
+                        rows="6"
+                        required
+                    >{{ compose.body_text }}</textarea>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2">
+                    <div>
+                        <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="cta_text">CTA button text</label>
+                        <input
+                            class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                            id="cta_text"
+                            name="cta_text"
+                            value="{{ compose.cta_text }}"
+                        />
+                    </div>
+                    <div>
+                        <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="cta_url">CTA URL</label>
+                        <input
+                            class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                            id="cta_url"
+                            name="cta_url"
+                            value="{{ compose.cta_url }}"
+                        />
+                    </div>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2">
+                    <div>
+                        <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="signature_name">Signature name</label>
+                        <input
+                            class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                            id="signature_name"
+                            name="signature_name"
+                            value="{{ compose.signature_name }}"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="signature_role">Signature role</label>
+                        <input
+                            class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                            id="signature_role"
+                            name="signature_role"
+                            value="{{ compose.signature_role }}"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="footer_text">Footer (small)</label>
+                    <textarea
+                        class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                        id="footer_text"
+                        name="footer_text"
+                        rows="2"
+                    >{{ compose.footer_text }}</textarea>
+                </div>
+
+                <div class="flex flex-wrap gap-3 pt-2">
+                    <button
+                        class="rounded-xl border border-line px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-accent hover:text-white"
+                        type="submit"
+                    >
+                        Save Draft
+                    </button>
+                    <button
+                        class="rounded-xl border border-line px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-accent hover:text-white"
+                        type="submit"
+                        formaction="/dashboard/emails/preview"
+                    >
+                        Preview
+                    </button>
+                    <button
+                        class="ml-auto rounded-xl bg-accentDeep px-4 py-2 text-sm font-semibold text-white shadow-glow transition hover:bg-accent"
+                        type="submit"
+                        formaction="/dashboard/emails/send"
+                    >
+                        Send Email
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="rounded-3xl border border-line bg-panel p-6 shadow-lg">
+            <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Live Render</p>
+            <h2 class="mt-2 text-xl font-semibold text-white">Markup Preview</h2>
+            <p class="mt-2 text-sm text-slate-400">This preview is rendered with the same HTML template used in outgoing messages.</p>
+
+            <div class="mt-6">
+                {% if preview_html %}
+                <iframe class="min-h-[560px] w-full rounded-xl border border-line bg-white" srcdoc="{{ preview_html|e }}"></iframe>
+                {% else %}
+                <p class="text-sm text-slate-400">Use Preview or Save Draft to generate a live email render.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="rounded-3xl border border-line bg-panel p-6 shadow-lg">
+            <p class="text-xs uppercase tracking-[0.3em] text-slate-400">History</p>
+            <h2 class="mt-2 text-xl font-semibold text-white">Sent Email History</h2>
+            <p class="mt-2 text-sm text-slate-400">Latest outbound messages sent from this dashboard.</p>
+
+            <ul class="mt-6 grid gap-3">
+                {% for email in sent_emails %}
+                <li class="rounded-xl border border-line bg-panelStrong p-3">
+                    <p class="text-sm font-medium text-white">{{ email.subject }}</p>
+                    <p class="mt-1 text-xs text-slate-400">{{ email.recipient_name }} · {{ email.recipient_email }}</p>
+                    <p class="mt-1 font-mono text-xs text-slate-500">Sent: {{ email.sent_at }}</p>
+                </li>
+                {% else %}
+                <li class="rounded-xl border border-line bg-panelStrong p-3">
+                    <p class="text-xs text-slate-400">No emails sent yet from this panel.</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</section>
+{% endblock %}
