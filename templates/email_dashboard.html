@@ -94,7 +94,12 @@
                     </div>
                     <p class="mt-1 text-xs text-slate-400">{{ draft.recipient_name }} · {{ draft.recipient_email }}</p>
                     <p class="mt-1 font-mono text-xs text-slate-500">Updated: {{ draft.updated_at }}</p>
-                    <form class="mt-2" method="POST" action="/dashboard/emails/drafts/{{ draft.id }}/delete">
+                    <form
+                        class="confirm-delete-form mt-2"
+                        method="POST"
+                        action="/dashboard/emails/drafts/{{ draft.id }}/delete"
+                        data-confirm-message="Delete this draft ({{ draft.subject }})? This cannot be undone."
+                    >
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                         <button
                             class="rounded-lg border border-red-400/40 bg-red-400/10 px-3 py-1 text-xs text-red-100 transition hover:border-red-400"

@@ -486,10 +486,13 @@ def create_app():
             query = session.query(Prospect)
             if region_filter:
                 query = query.filter(Prospect.region == region_filter)
-            if flag_filter == "needs_upgrade":
-                query = query.filter(Prospect.performance_flag.is_(True))
-            elif flag_filter == "looks_solid":
-                query = query.filter(Prospect.performance_flag.is_(False))
+            has_website = Prospect.website.isnot(None) & (Prospect.website != "")
+            if flag_filter == "no_website":
+                query = query.filter(~has_website)
+            elif flag_filter == "weak_website":
+                query = query.filter(has_website, Prospect.performance_flag.is_(True))
+            elif flag_filter == "solid":
+                query = query.filter(has_website, Prospect.performance_flag.is_(False))
             if contacted_filter == "contacted":
                 query = query.filter(Prospect.contacted_status.is_(True))
             elif contacted_filter == "not_contacted":
@@ -511,12 +514,20 @@ def create_app():
 
         leads = []
         for row in rows:
+            website = row.website or ""
+            if not website:
+                website_status = "no_website"
+            elif row.performance_flag:
+                website_status = "weak_website"
+            else:
+                website_status = "solid"
             leads.append(
                 {
                     "id": row.id,
                     "name": row.name,
                     "region": row.region,
-                    "website": row.website or "",
+                    "website": website,
+                    "website_status": website_status,
                     "category": row.category or "",
                     "performance_flag": bool(row.performance_flag),
                     "contacted_status": bool(row.contacted_status),
@@ -526,6 +537,8 @@ def create_app():
 
         stats = {
             "total": len(all_rows),
+            "no_website": sum(1 for r in all_rows if not (r.website or "")),
+            "weak_website": sum(1 for r in all_rows if (r.website or "") and r.performance_flag),
             "flagged": sum(1 for r in all_rows if r.performance_flag),
             "contacted": sum(1 for r in all_rows if r.contacted_status),
             "not_interesting": sum(1 for r in all_rows if r.not_interesting),
@@ -1187,11 +1200,17 @@ def create_app():
 
         # Collapse near-duplicate leads (same business, different casing/
         # whitespace across OSM elements or keyword queries) before they
-        # ever reach the database, keeping the first occurrence of each.
+        # ever reach the database. Prefer whichever occurrence actually has
+        # a website tagged, since OSM sometimes returns the same POI twice
+        # with the site tag on only one of them, an earlier version of this
+        # kept whichever came first and could silently discard the copy
+        # with the real website in favor of a "no website" duplicate.
         deduped_leads = {}
         for lead in scraped:
             key = (" ".join(lead["name"].strip().lower().split()), lead["region"].strip().lower())
-            deduped_leads.setdefault(key, lead)
+            current = deduped_leads.get(key)
+            if current is None or (not current.get("website") and lead.get("website")):
+                deduped_leads[key] = lead
 
         added = 0
         updated = 0
@@ -1207,6 +1226,20 @@ def create_app():
                     )
                     .first()
                 )
+                if not existing and lead.get("website"):
+                    # Fall back to matching by website: catches the same
+                    # business returned under a genuinely different name
+                    # string (legal suffix, punctuation) that the name-based
+                    # match above won't catch, when we at least know the
+                    # site is the same.
+                    existing = (
+                        session.query(Prospect)
+                        .filter(
+                            Prospect.website == lead["website"],
+                            Prospect.region == lead["region"],
+                        )
+                        .first()
+                    )
                 if existing:
                     existing.website = lead["website"] or existing.website
                     existing.performance_flag = bool(lead["performance_flag"])
@@ -1262,6 +1295,27 @@ def create_app():
                 filter_flag=request.form.get("filter_flag", ""),
                 filter_contacted=request.form.get("filter_contacted", ""),
                 filter_interest=request.form.get("filter_interest", ""),
+            )
+        )
+
+    @app.route("/dashboard/prospects/<int:prospect_id>/delete", methods=["POST"])
+    @require_dashboard_auth
+    def prospects_delete(prospect_id):
+        db, db_error = _get_dashboard_db_or_error()
+        if not db:
+            return render_prospects_dashboard(error_message=db_error)
+
+        with db.session() as session:
+            session.query(Prospect).filter(Prospect.id == prospect_id).delete()
+
+        return redirect(
+            url_for(
+                "prospects_dashboard",
+                filter_region=request.form.get("filter_region", ""),
+                filter_flag=request.form.get("filter_flag", ""),
+                filter_contacted=request.form.get("filter_contacted", ""),
+                filter_interest=request.form.get("filter_interest", ""),
+                message="Prospect deleted.",
             )
         )
 

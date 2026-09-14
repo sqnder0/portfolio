@@ -1,16 +1,21 @@
 {% extends "dashboard_base.html" %}
 
 {% block content %}
-<section class="grid gap-4 md:grid-cols-4">
+<section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
     <div class="rounded-2xl border border-line bg-panel p-5 shadow-lg">
         <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Total Leads</p>
         <p class="mt-3 text-3xl font-semibold text-white">{{ stats.total }}</p>
         <p class="mt-2 text-sm text-slate-400">Tracked prospects across your target regions.</p>
     </div>
     <div class="rounded-2xl border border-line bg-panel p-5 shadow-lg">
-        <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Needs Upgrade</p>
-        <p class="mt-3 text-3xl font-semibold text-white">{{ stats.flagged }}</p>
-        <p class="mt-2 text-sm text-slate-400">Missing or low-quality web presence.</p>
+        <p class="text-xs uppercase tracking-[0.3em] text-slate-400">No Website</p>
+        <p class="mt-3 text-3xl font-semibold text-white">{{ stats.no_website }}</p>
+        <p class="mt-2 text-sm text-slate-400">Nothing found in OSM, worth a manual check.</p>
+    </div>
+    <div class="rounded-2xl border border-line bg-panel p-5 shadow-lg">
+        <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Weak Website</p>
+        <p class="mt-3 text-3xl font-semibold text-white">{{ stats.weak_website }}</p>
+        <p class="mt-2 text-sm text-slate-400">Confirmed site, low quality (Wix, social page...).</p>
     </div>
     <div class="rounded-2xl border border-line bg-panel p-5 shadow-lg">
         <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Contacted</p>
@@ -24,8 +29,8 @@
     </div>
 </section>
 
-<section class="grid gap-6 lg:grid-cols-[1.1fr_2fr]">
-    <div class="rounded-3xl border border-line bg-panelStrong p-6 shadow-lg">
+<section class="grid gap-6 lg:grid-cols-[360px_1fr]">
+    <div class="rounded-3xl border border-line bg-panelStrong p-6 shadow-lg lg:self-start">
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Lead Generator</p>
@@ -66,9 +71,13 @@
                 Scrape Leads
             </button>
         </form>
+        <p class="mt-4 text-xs leading-relaxed text-slate-500">
+            Website data comes from OpenStreetMap tags, not a live check. "No Website" often just means OSM
+            has no site on file, not that one doesn't exist, so verify before writing anyone off.
+        </p>
     </div>
 
-    <div class="rounded-3xl border border-line bg-panel p-6 shadow-lg">
+    <div class="min-w-0 rounded-3xl border border-line bg-panel p-6 shadow-lg">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
                 <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Prospect Queue</p>
@@ -99,8 +108,9 @@
                     name="filter_flag"
                 >
                     <option value="" {% if not filter_flag %}selected{% endif %}>Any</option>
-                    <option value="needs_upgrade" {% if filter_flag == "needs_upgrade" %}selected{% endif %}>Needs upgrade</option>
-                    <option value="looks_solid" {% if filter_flag == "looks_solid" %}selected{% endif %}>Looks solid</option>
+                    <option value="no_website" {% if filter_flag == "no_website" %}selected{% endif %}>No website</option>
+                    <option value="weak_website" {% if filter_flag == "weak_website" %}selected{% endif %}>Weak website</option>
+                    <option value="solid" {% if filter_flag == "solid" %}selected{% endif %}>Looks solid</option>
                 </select>
             </div>
             <div>
@@ -144,24 +154,28 @@
         </form>
 
         <div class="mt-6 overflow-x-auto">
-            <table class="w-full min-w-[640px] text-left text-sm">
+            <table class="w-full min-w-[900px] text-left text-sm">
                 <thead class="text-xs uppercase tracking-[0.2em] text-slate-500">
                     <tr>
                         <th class="pb-3">Lead</th>
                         <th class="pb-3">Website</th>
-                        <th class="pb-3">Flag</th>
                         <th class="pb-3">Status</th>
+                        <th class="pb-3">Pipeline</th>
                         <th class="pb-3">Outreach</th>
+                        <th class="pb-3"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-line text-slate-200">
                     {% for lead in leads %}
                     <tr class="align-top {% if lead.not_interesting %}opacity-50{% endif %}">
-                        <td class="py-4">
+                        <td class="py-4 pr-4">
                             <p class="font-medium text-white">{{ lead.name }}</p>
                             <p class="mt-1 text-xs text-slate-400">{{ lead.region }}</p>
+                            {% if lead.category %}
+                            <p class="mt-1 text-xs text-slate-500">{{ lead.category }}</p>
+                            {% endif %}
                         </td>
-                        <td class="py-4">
+                        <td class="py-4 pr-4">
                             {% if lead.website %}
                             <a
                                 class="text-accent hover:text-white"
@@ -171,16 +185,20 @@
                             >
                                 Visit site
                             </a>
-                            <p class="mt-1 text-xs text-slate-500">{{ lead.website }}</p>
+                            <p class="mt-1 max-w-[220px] break-words text-xs text-slate-500">{{ lead.website }}</p>
                             {% else %}
-                            <span class="text-xs text-slate-500">No website listed</span>
+                            <span class="text-xs text-slate-500">Not listed in OSM</span>
                             {% endif %}
                         </td>
-                        <td class="py-4">
+                        <td class="py-4 pr-4">
                             <div class="flex flex-col items-start gap-2">
-                                {% if lead.performance_flag %}
+                                {% if lead.website_status == "no_website" %}
+                                <span class="rounded-full border border-line bg-slate-800 px-3 py-1 text-xs text-slate-300" title="OpenStreetMap has no site on file for this lead — that's not proof one doesn't exist.">
+                                    No website found
+                                </span>
+                                {% elif lead.website_status == "weak_website" %}
                                 <span class="rounded-full border border-red-400/40 bg-red-400/10 px-3 py-1 text-xs text-red-100">
-                                    Needs upgrade
+                                    Weak website
                                 </span>
                                 {% else %}
                                 <span class="rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-1 text-xs text-emerald-100">
@@ -194,33 +212,44 @@
                                 {% endif %}
                             </div>
                         </td>
-                        <td class="py-4">
-                            <form method="POST" action="/dashboard/prospects/{{ lead.id }}/status" class="space-y-2">
+                        <td class="py-4 pr-4">
+                            <form method="POST" action="/dashboard/prospects/{{ lead.id }}/status" class="space-y-3">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                 <input type="hidden" name="filter_region" value="{{ filter_region }}" />
                                 <input type="hidden" name="filter_flag" value="{{ filter_flag }}" />
                                 <input type="hidden" name="filter_contacted" value="{{ filter_contacted }}" />
                                 <input type="hidden" name="filter_interest" value="{{ filter_interest }}" />
-                                <label class="flex items-center gap-2 text-xs text-slate-300">
-                                    <input
-                                        type="checkbox"
-                                        name="contacted"
-                                        value="1"
-                                        class="h-4 w-4 rounded border-line bg-slateBlue text-accent focus:ring-accent"
-                                        {% if lead.contacted_status %}checked{% endif %}
-                                    />
-                                    Contacted
+
+                                <label class="flex items-center gap-2">
+                                    <span class="relative inline-flex h-6 w-11 shrink-0 items-center">
+                                        <input
+                                            type="checkbox"
+                                            name="contacted"
+                                            value="1"
+                                            class="peer sr-only"
+                                            {% if lead.contacted_status %}checked{% endif %}
+                                        />
+                                        <span class="absolute inset-0 rounded-full bg-slate-700 transition peer-checked:bg-accentDeep"></span>
+                                        <span class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition peer-checked:translate-x-5"></span>
+                                    </span>
+                                    <span class="text-xs text-slate-300">Contacted</span>
                                 </label>
-                                <label class="flex items-center gap-2 text-xs text-slate-300">
-                                    <input
-                                        type="checkbox"
-                                        name="not_interesting"
-                                        value="1"
-                                        class="h-4 w-4 rounded border-line bg-slateBlue text-danger focus:ring-danger"
-                                        {% if lead.not_interesting %}checked{% endif %}
-                                    />
-                                    Not interesting
+
+                                <label class="flex items-center gap-2">
+                                    <span class="relative inline-flex h-6 w-11 shrink-0 items-center">
+                                        <input
+                                            type="checkbox"
+                                            name="not_interesting"
+                                            value="1"
+                                            class="peer sr-only"
+                                            {% if lead.not_interesting %}checked{% endif %}
+                                        />
+                                        <span class="absolute inset-0 rounded-full bg-slate-700 transition peer-checked:bg-danger"></span>
+                                        <span class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition peer-checked:translate-x-5"></span>
+                                    </span>
+                                    <span class="text-xs text-slate-300">Not interesting</span>
                                 </label>
+
                                 <button
                                     class="rounded-lg border border-line px-3 py-1 text-xs text-slate-300 transition hover:border-accent hover:text-white"
                                     type="submit"
@@ -229,7 +258,7 @@
                                 </button>
                             </form>
                         </td>
-                        <td class="py-4">
+                        <td class="py-4 pr-4">
                             <button
                                 type="button"
                                 class="copy-lead-btn rounded-lg border border-line px-3 py-1 text-xs text-slate-300 transition hover:border-accent hover:text-white"
@@ -237,15 +266,37 @@
                                 data-region="{{ lead.region }}"
                                 data-website="{{ lead.website }}"
                                 data-category="{{ lead.category }}"
-                                data-flag="{{ 'Needs upgrade' if lead.performance_flag else 'Looks solid' }}"
+                                data-flag="{{ lead.website_status.replace('_', ' ') }}"
                             >
                                 Copy for AI research
                             </button>
                         </td>
+                        <td class="py-4">
+                            <form
+                                method="POST"
+                                action="/dashboard/prospects/{{ lead.id }}/delete"
+                                class="confirm-delete-form"
+                                data-confirm-message="Delete {{ lead.name }}? This cannot be undone."
+                            >
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                <input type="hidden" name="filter_region" value="{{ filter_region }}" />
+                                <input type="hidden" name="filter_flag" value="{{ filter_flag }}" />
+                                <input type="hidden" name="filter_contacted" value="{{ filter_contacted }}" />
+                                <input type="hidden" name="filter_interest" value="{{ filter_interest }}" />
+                                <button
+                                    class="rounded-lg border border-line p-2 text-slate-400 transition hover:border-red-400 hover:text-red-300"
+                                    type="submit"
+                                    title="Delete this prospect"
+                                    aria-label="Delete {{ lead.name }}"
+                                >
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </form>
+                        </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" class="py-8 text-center text-sm text-slate-400">
+                        <td colspan="6" class="py-8 text-center text-sm text-slate-400">
                             {% if stats.total %}
                             No leads match these filters.
                             {% else %}

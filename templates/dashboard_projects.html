@@ -96,7 +96,7 @@
         </form>
     </div>
 
-    <div class="rounded-3xl border border-line bg-panel p-6 shadow-lg">
+    <div class="min-w-0 rounded-3xl border border-line bg-panel p-6 shadow-lg">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
                 <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Live Order</p>
@@ -162,7 +162,12 @@
                             >
                                 Edit
                             </a>
-                            <form method="POST" action="/dashboard/projects/{{ project.id }}/delete">
+                            <form
+                                method="POST"
+                                action="/dashboard/projects/{{ project.id }}/delete"
+                                class="confirm-delete-form"
+                                data-confirm-message="Delete {{ project.title }}? This cannot be undone."
+                            >
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                 <button
                                     class="rounded-lg border border-red-400/40 bg-red-400/10 px-3 py-1 text-xs text-red-100 transition hover:border-red-400"
