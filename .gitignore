@@ -8,3 +8,5 @@ bootstrap/
 node_modules/
 .pytest_cache/
 tools_cache.json
+*.db
+*.db-journal

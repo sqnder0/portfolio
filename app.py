@@ -9,6 +9,7 @@ from urllib import error, parse, request as http_request
 
 from flask import (
     Flask,
+    current_app,
     jsonify,
     make_response,
     redirect,
@@ -196,7 +197,7 @@ def _sanitize_language(raw_language):
 def _render_page(template_name, language, **kwargs):
     return render_template(
         template_name,
-        cards=get_cards(),
+        cards=get_cards(current_app.extensions.get("dashboard_db")),
         projects=get_projects(),
         current_language=language,
         get_translation=get_translation,
@@ -396,8 +397,6 @@ def create_app():
     )
 
     CSRFProtect(app)
-    app.extensions["submission_tracker"] = SubmissionTracker(app.config["DATABASE_PATH"])
-    app.extensions["email_dashboard_store"] = EmailDashboardStore(app.config["DATABASE_PATH"])
 
     dashboard_db = None
     dashboard_db_error = ""
@@ -407,10 +406,12 @@ def create_app():
             dashboard_db.create_tables()
     except Exception as exc:
         LOGGER.error("Failed to initialize dashboard database: %s", exc)
-        dashboard_db_error = "Dashboard database could not be initialized."
+        dashboard_db_error = "Database could not be initialized. Set DATABASE_URL to your Postgres instance."
 
     app.extensions["dashboard_db"] = dashboard_db
     app.extensions["dashboard_db_error"] = dashboard_db_error
+    app.extensions["submission_tracker"] = SubmissionTracker(dashboard_db)
+    app.extensions["email_dashboard_store"] = EmailDashboardStore(dashboard_db)
 
     def require_dashboard_auth(view):
         @wraps(view)
@@ -433,6 +434,9 @@ def create_app():
     def render_dashboard(compose=None, message="", error_message="", preview_html=""):
         store = app.extensions["email_dashboard_store"]
         compose_data = compose or _dashboard_compose_defaults()
+        if not error_message:
+            _, db_error = _get_dashboard_db_or_error()
+            error_message = db_error
         return render_template(
             "email_dashboard.html",
             compose=compose_data,

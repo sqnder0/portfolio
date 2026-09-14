@@ -30,6 +30,17 @@ cp .env.example .env
 python app.py
 ```
 
+## Database
+
+All persistent app data (toolkit cards, contact-form rate limiting, prospects, clients,
+email drafts/history) lives in Postgres via `DATABASE_URL`. There is no bundled SQLite
+file anymore. Tables are created automatically on startup (`Base.metadata.create_all`),
+and the toolkit table is auto-seeded with defaults the first time it's empty.
+
+Without `DATABASE_URL` set, the app still starts: the toolkit section renders empty,
+rate limiting fails open (logs a warning, allows submissions), and the dashboard pages
+show a "DATABASE_URL is not configured" banner instead of erroring.
+
 ## Client Email Dashboard
 
 Compose and send client emails from the built-in panel:
@@ -57,10 +68,6 @@ Command center routes:
 - `/dashboard/prospects`
 - `/dashboard/billing`
 
-Requires:
-
-- `DATABASE_URL` (external Postgres)
-
 Hosting renewal notifier (run via cron):
 
 ```bash
@@ -80,7 +87,7 @@ Required environment variables:
 
 - `FLASK_ENV=production`
 - `SECRET_KEY`
-- `DATABASE_PATH`
+- `DATABASE_URL`
 - `OWNER_EMAIL`
 - `WEBSITE_URL`
 - `RESEND_FROM_EMAIL`

@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import sqlite3
 import time
 import uuid
 from urllib import error, request
@@ -9,37 +8,14 @@ from urllib import error, request
 import wikipedia
 from dotenv import dotenv_values
 
+from dashboard_db import Tool
+
 LOGGER = logging.getLogger(__name__)
 
 _CARD_CACHE = None
 _CARD_CACHE_EXPIRES_AT = 0
 _TRANSLATIONS_CACHE = None
 _PROJECTS_CACHE = None
-
-
-class Database:
-    def __init__(self, path):
-        self.path = path
-
-    def execute(self, command, *args):
-        try:
-            with sqlite3.connect(self.path) as conn:
-                cur = conn.cursor()
-                cur.execute(command, args)
-                values = cur.fetchall()
-                column_names = [description[0] for description in cur.description]
-
-                rows = []
-                for value_tuple in values:
-                    row = {}
-                    for index, value in enumerate(value_tuple):
-                        row[column_names[index]] = value
-                    rows.append(row)
-
-                return rows
-        except sqlite3.Error as exc:
-            LOGGER.error("Database error: %s", exc)
-            return None
 
 
 class Email:
@@ -154,18 +130,24 @@ def get_translation(language, *keys, default=""):
     return value
 
 
-def get_cards():
+def get_cards(db):
     global _CARD_CACHE, _CARD_CACHE_EXPIRES_AT
 
     now = time.time()
     if _CARD_CACHE and now < _CARD_CACHE_EXPIRES_AT:
         return _CARD_CACHE
 
-    db_path = os.getenv("DATABASE_PATH", "portfolio.db")
     cache_ttl = int(os.getenv("TOOLS_CACHE_TTL", "1800"))
-    db = Database(db_path)
 
-    cards = db.execute("SELECT * FROM tools;") or []
+    cards = []
+    if db:
+        with db.session() as session:
+            rows = session.query(Tool).order_by(Tool.sort_order.asc()).all()
+            cards = [
+                {"id": row.id, "name": row.name, "path": row.path, "wiki": row.wiki}
+                for row in rows
+            ]
+
     for card in cards:
         try:
             card["innerText"] = wikipedia.summary(card["wiki"], sentences=2)

@@ -1,7 +1,19 @@
 import os
 from contextlib import contextmanager
 
-from sqlalchemy import Boolean, Column, Date, Integer, Numeric, String, UniqueConstraint, create_engine
+from sqlalchemy import (
+    Boolean,
+    Column,
+    Date,
+    ForeignKey,
+    Index,
+    Integer,
+    Numeric,
+    String,
+    Text,
+    UniqueConstraint,
+    create_engine,
+)
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 Base = declarative_base()
@@ -36,6 +48,102 @@ class Client(Base):
     )
 
 
+class Tool(Base):
+    __tablename__ = "tools"
+
+    id = Column(String(60), primary_key=True)
+    name = Column(String(120), nullable=False)
+    path = Column(String(200), nullable=False)
+    wiki = Column(String(200), nullable=False)
+    sort_order = Column(Integer, nullable=False, default=0)
+
+
+DEFAULT_TOOLS = [
+    {"id": "html", "name": "HTML 5", "path": "html.svg", "wiki": "html5"},
+    {"id": "css", "name": "CSS 3", "path": "css.svg", "wiki": "css3"},
+    {"id": "javascript", "name": "Javascript", "path": "javascript.svg", "wiki": "javascript"},
+    {"id": "python", "name": "Python", "path": "python.svg", "wiki": "python_(programming_language)"},
+    {"id": "react", "name": "React", "path": "react.png", "wiki": "React (software)"},
+    {"id": "django", "name": "Django", "path": "django.svg", "wiki": "django_(web_framework)"},
+    {"id": "flask", "name": "Flask", "path": "flask.svg", "wiki": "Flask_(web_framework)"},
+    {"id": "c", "name": "C", "path": "c.svg", "wiki": "C_(programming_language)"},
+    {"id": "sqlite", "name": "SQLite", "path": "sqlite.svg", "wiki": "sqlite"},
+    {"id": "sass", "name": "sass", "path": "sass.svg", "wiki": "Sass (style sheet language)"},
+]
+
+
+class FormSubmission(Base):
+    __tablename__ = "form_submissions"
+
+    id = Column(Integer, primary_key=True)
+    ip_address = Column(String(64), nullable=False)
+    email = Column(String(320), nullable=False)
+    submitted_at = Column(Integer, nullable=False)
+
+    __table_args__ = (
+        Index("idx_form_submissions_ip_time", "ip_address", "submitted_at"),
+        Index("idx_form_submissions_email_time", "email", "submitted_at"),
+    )
+
+
+class EmailClient(Base):
+    __tablename__ = "email_clients"
+
+    id = Column(Integer, primary_key=True)
+    full_name = Column(String(200), nullable=False)
+    email = Column(String(320), nullable=False, unique=True)
+    company = Column(String(200), nullable=True)
+    created_at = Column(String(40), nullable=False)
+    updated_at = Column(String(40), nullable=False)
+
+
+class EmailDraft(Base):
+    __tablename__ = "email_drafts"
+
+    id = Column(Integer, primary_key=True)
+    client_id = Column(Integer, ForeignKey("email_clients.id", ondelete="SET NULL"), nullable=True)
+    recipient_name = Column(String(200), nullable=False)
+    recipient_email = Column(String(320), nullable=False)
+    subject = Column(String(300), nullable=False)
+    header_title = Column(String(300), nullable=False)
+    header_subtitle = Column(String(300), nullable=False)
+    greeting = Column(String(300), nullable=False)
+    intro_text = Column(Text, nullable=False)
+    body_text = Column(Text, nullable=False)
+    cta_text = Column(String(200), nullable=True)
+    cta_url = Column(String(500), nullable=True)
+    signature_name = Column(String(200), nullable=False)
+    signature_role = Column(String(200), nullable=True)
+    footer_text = Column(Text, nullable=True)
+    created_at = Column(String(40), nullable=False)
+    updated_at = Column(String(40), nullable=False)
+
+    __table_args__ = (Index("idx_email_drafts_updated", "updated_at"),)
+
+
+class SentEmail(Base):
+    __tablename__ = "sent_emails"
+
+    id = Column(Integer, primary_key=True)
+    client_id = Column(Integer, ForeignKey("email_clients.id", ondelete="SET NULL"), nullable=True)
+    recipient_name = Column(String(200), nullable=False)
+    recipient_email = Column(String(320), nullable=False)
+    subject = Column(String(300), nullable=False)
+    header_title = Column(String(300), nullable=False)
+    header_subtitle = Column(String(300), nullable=False)
+    greeting = Column(String(300), nullable=False)
+    intro_text = Column(Text, nullable=False)
+    body_text = Column(Text, nullable=False)
+    cta_text = Column(String(200), nullable=True)
+    cta_url = Column(String(500), nullable=True)
+    signature_name = Column(String(200), nullable=False)
+    signature_role = Column(String(200), nullable=True)
+    footer_text = Column(Text, nullable=True)
+    sent_at = Column(String(40), nullable=False)
+
+    __table_args__ = (Index("idx_sent_emails_sent_at", "sent_at"),)
+
+
 class DashboardDatabase:
     def __init__(self, database_url):
         if not database_url:
@@ -52,6 +160,14 @@ class DashboardDatabase:
 
     def create_tables(self):
         Base.metadata.create_all(self.engine)
+        self._seed_tools()
+
+    def _seed_tools(self):
+        with self.session() as session:
+            if session.query(Tool).first() is not None:
+                return
+            for index, tool in enumerate(DEFAULT_TOOLS):
+                session.add(Tool(sort_order=index, **tool))
 
     @contextmanager
     def session(self):
