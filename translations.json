@@ -2,6 +2,11 @@
   "en": {
     "language": "English",
     "language_code": "en",
+    "meta": {
+      "title": "Sander Pelgrims | Full Stack Web Developer Belgium",
+      "description": "Professional full-stack web developer from Belgium. I build fast, conversion-focused websites that help businesses grow. Specializing in responsive design, performance optimization, and modern web technologies.",
+      "keywords": "web developer, full-stack, Belgium, freelance, portfolio, responsive design"
+    },
     "email": {
       "user_confirmation": {
         "subject": "We received your submission",
@@ -61,6 +66,11 @@
   "nl": {
     "language": "Nederlands",
     "language_code": "nl",
+    "meta": {
+      "title": "Sander Pelgrims | Freelance Webontwikkelaar België",
+      "description": "Freelance full-stack webontwikkelaar uit België. Ik bouw snelle, conversiegerichte websites die je bedrijf laten groeien. Gespecialiseerd in responsive design, performance-optimalisatie en moderne webtechnologieën.",
+      "keywords": "webontwikkelaar, website laten maken, freelance developer, full-stack, België, responsive design"
+    },
     "email": {
       "user_confirmation": {
         "subject": "We hebben uw inzending ontvangen",
@@ -120,6 +130,11 @@
   "fr": {
     "language": "Français",
     "language_code": "fr",
+    "meta": {
+      "title": "Sander Pelgrims | Développeur Web Full-Stack Belgique",
+      "description": "Développeur web full-stack indépendant basé en Belgique. Je crée des sites rapides et orientés conversion qui font grandir votre entreprise. Spécialisé en design responsive, optimisation des performances et technologies web modernes.",
+      "keywords": "développeur web, création de site web, freelance, full-stack, Belgique, design responsive"
+    },
     "email": {
       "user_confirmation": {
         "subject": "Nous avons reçu votre soumission",

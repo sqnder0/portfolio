@@ -470,17 +470,32 @@ def create_app():
             )
         return db, error_message
 
-    def _load_prospects(db):
+    def _load_prospects(db, region_filter="", flag_filter="", contacted_filter=""):
         with db.session() as session:
-            rows = (
-                session.query(Prospect)
-                .order_by(
-                    Prospect.contacted_status.asc(),
-                    Prospect.performance_flag.desc(),
-                    Prospect.name.asc(),
-                )
-                .all()
-            )
+            all_regions = [
+                r[0] for r in session.query(Prospect.region).distinct().order_by(Prospect.region.asc()).all()
+            ]
+
+            query = session.query(Prospect)
+            if region_filter:
+                query = query.filter(Prospect.region == region_filter)
+            if flag_filter == "needs_upgrade":
+                query = query.filter(Prospect.performance_flag.is_(True))
+            elif flag_filter == "looks_solid":
+                query = query.filter(Prospect.performance_flag.is_(False))
+            if contacted_filter == "contacted":
+                query = query.filter(Prospect.contacted_status.is_(True))
+            elif contacted_filter == "not_contacted":
+                query = query.filter(Prospect.contacted_status.is_(False))
+
+            rows = query.order_by(
+                Prospect.contacted_status.asc(),
+                Prospect.performance_flag.desc(),
+                Prospect.name.asc(),
+            ).all()
+
+            # Stats always reflect the full, unfiltered set so the summary cards stay stable.
+            all_rows = session.query(Prospect).all()
 
         leads = []
         for row in rows:
@@ -495,15 +510,12 @@ def create_app():
                 }
             )
 
-        total = len(leads)
-        flagged = sum(1 for lead in leads if lead["performance_flag"])
-        contacted = sum(1 for lead in leads if lead["contacted_status"])
         stats = {
-            "total": total,
-            "flagged": flagged,
-            "contacted": contacted,
+            "total": len(all_rows),
+            "flagged": sum(1 for r in all_rows if r.performance_flag),
+            "contacted": sum(1 for r in all_rows if r.contacted_status),
         }
-        return leads, stats
+        return leads, stats, all_regions
 
     def _load_clients(db):
         with db.session() as session:
@@ -544,13 +556,27 @@ def create_app():
         }
         return clients, summary
 
-    def render_prospects_dashboard(message="", error_message="", region="", keywords=""):
+    def render_prospects_dashboard(
+        message="",
+        error_message="",
+        region="",
+        keywords="",
+        filter_region="",
+        filter_flag="",
+        filter_contacted="",
+    ):
         db, db_error = _get_dashboard_db_or_error()
         leads = []
         stats = {"total": 0, "flagged": 0, "contacted": 0}
+        all_regions = []
 
         if db:
-            leads, stats = _load_prospects(db)
+            leads, stats, all_regions = _load_prospects(
+                db,
+                region_filter=filter_region,
+                flag_filter=filter_flag,
+                contacted_filter=filter_contacted,
+            )
 
         if db_error and not error_message:
             error_message = db_error
@@ -563,6 +589,10 @@ def create_app():
             stats=stats,
             region=region,
             keywords=keywords,
+            all_regions=all_regions,
+            filter_region=filter_region,
+            filter_flag=filter_flag,
+            filter_contacted=filter_contacted,
             message=message,
             error_message=error_message,
         )
@@ -1056,11 +1086,17 @@ def create_app():
         keywords = _normalize_text(request.args.get("keywords"), 200)
         message = (request.args.get("message") or "").strip()
         error_message = (request.args.get("error") or "").strip()
+        filter_region = _normalize_text(request.args.get("filter_region"), 120)
+        filter_flag = (request.args.get("filter_flag") or "").strip()
+        filter_contacted = (request.args.get("filter_contacted") or "").strip()
         return render_prospects_dashboard(
             message=message,
             error_message=error_message,
             region=region,
             keywords=keywords,
+            filter_region=filter_region,
+            filter_flag=filter_flag,
+            filter_contacted=filter_contacted,
         )
 
     @app.route("/dashboard/prospects/scrape", methods=["POST"])
@@ -1145,7 +1181,14 @@ def create_app():
             if prospect:
                 prospect.contacted_status = contacted
 
-        return redirect(url_for("prospects_dashboard"))
+        return redirect(
+            url_for(
+                "prospects_dashboard",
+                filter_region=request.form.get("filter_region", ""),
+                filter_flag=request.form.get("filter_flag", ""),
+                filter_contacted=request.form.get("filter_contacted", ""),
+            )
+        )
 
     @app.route("/dashboard/billing", methods=["GET"])
     @require_dashboard_auth

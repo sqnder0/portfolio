@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ current_language }}">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sander Pelgrims | Full Stack Web Developer Belgium</title>
+    <title>{{ get_translation(current_language, 'meta', 'title', default='Sander Pelgrims | Full Stack Web Developer Belgium') }}</title>
 
     <meta
       name="description"
-      content="Professional full-stack web developer from Belgium. I build fast, conversion-focused websites that help businesses grow. Specializing in responsive design, performance optimization, and modern web technologies."
+      content="{{ get_translation(current_language, 'meta', 'description', default='Professional full-stack web developer from Belgium. I build fast, conversion-focused websites that help businesses grow. Specializing in responsive design, performance optimization, and modern web technologies.') }}"
     />
-    <meta name="keywords" content="web developer, full-stack, Belgium, freelance, portfolio, responsive design" />
+    <meta name="keywords" content="{{ get_translation(current_language, 'meta', 'keywords', default='web developer, full-stack, Belgium, freelance, portfolio, responsive design') }}" />
     <meta name="author" content="Sander Pelgrims" />
 
     <!-- Bootstrap styles -->
@@ -166,7 +166,7 @@
     <!-- ========== SKILLS SECTION ========== -->
     <section id="skills">
       <div class="container-custom">
-        <h2><span class="text-accent">My</span> Toolkit</h2>
+        <h2><span class="text-accent" data-i18n="skillsTitleAccent">My</span> <span data-i18n="skillsTitleSuffix">Toolkit</span></h2>
         <div class="skills-grid">
           {% for card in cards %}
           <div class="skill-card" title="{{ card['name'] }}">

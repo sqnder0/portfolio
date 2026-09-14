@@ -69,8 +69,63 @@
                 <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Prospect Queue</p>
                 <h2 class="mt-2 text-xl font-semibold text-white">Scraped Leads</h2>
             </div>
-            <span class="rounded-full border border-line px-3 py-1 text-xs text-slate-300">{{ stats.total }} leads</span>
+            <span class="rounded-full border border-line px-3 py-1 text-xs text-slate-300">{{ leads|length }} of {{ stats.total }} leads</span>
         </div>
+
+        <form class="mt-5 flex flex-wrap items-end gap-3" method="GET" action="/dashboard/prospects">
+            <div>
+                <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="filter_region">Region</label>
+                <select
+                    class="mt-2 rounded-xl border border-slate-400/70 bg-slate-900/80 px-3 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                    id="filter_region"
+                    name="filter_region"
+                >
+                    <option value="" {% if not filter_region %}selected{% endif %}>All regions</option>
+                    {% for r in all_regions %}
+                    <option value="{{ r }}" {% if filter_region == r %}selected{% endif %}>{{ r }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="filter_flag">Website</label>
+                <select
+                    class="mt-2 rounded-xl border border-slate-400/70 bg-slate-900/80 px-3 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                    id="filter_flag"
+                    name="filter_flag"
+                >
+                    <option value="" {% if not filter_flag %}selected{% endif %}>Any</option>
+                    <option value="needs_upgrade" {% if filter_flag == "needs_upgrade" %}selected{% endif %}>Needs upgrade</option>
+                    <option value="looks_solid" {% if filter_flag == "looks_solid" %}selected{% endif %}>Looks solid</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="filter_contacted">Contacted</label>
+                <select
+                    class="mt-2 rounded-xl border border-slate-400/70 bg-slate-900/80 px-3 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                    id="filter_contacted"
+                    name="filter_contacted"
+                >
+                    <option value="" {% if not filter_contacted %}selected{% endif %}>Any</option>
+                    <option value="not_contacted" {% if filter_contacted == "not_contacted" %}selected{% endif %}>Not yet contacted</option>
+                    <option value="contacted" {% if filter_contacted == "contacted" %}selected{% endif %}>Contacted</option>
+                </select>
+            </div>
+            <button
+                class="rounded-xl border border-line px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-accent hover:text-white"
+                type="submit"
+            >
+                Apply filters
+            </button>
+            {% if filter_region or filter_flag or filter_contacted %}
+            <a
+                class="text-xs text-slate-400 underline decoration-dotted hover:text-white"
+                href="/dashboard/prospects"
+            >
+                Clear
+            </a>
+            {% endif %}
+        </form>
+
         <div class="mt-6 overflow-x-auto">
             <table class="w-full min-w-[640px] text-left text-sm">
                 <thead class="text-xs uppercase tracking-[0.2em] text-slate-500">
@@ -79,6 +134,7 @@
                         <th class="pb-3">Website</th>
                         <th class="pb-3">Flag</th>
                         <th class="pb-3">Contacted</th>
+                        <th class="pb-3">Outreach</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-line text-slate-200">
@@ -117,6 +173,9 @@
                         <td class="py-4">
                             <form method="POST" action="/dashboard/prospects/{{ lead.id }}/contacted" class="space-y-2">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                <input type="hidden" name="filter_region" value="{{ filter_region }}" />
+                                <input type="hidden" name="filter_flag" value="{{ filter_flag }}" />
+                                <input type="hidden" name="filter_contacted" value="{{ filter_contacted }}" />
                                 <label class="flex items-center gap-2 text-xs text-slate-300">
                                     <input
                                         type="checkbox"
@@ -135,11 +194,27 @@
                                 </button>
                             </form>
                         </td>
+                        <td class="py-4">
+                            <button
+                                type="button"
+                                class="copy-lead-btn rounded-lg border border-line px-3 py-1 text-xs text-slate-300 transition hover:border-accent hover:text-white"
+                                data-name="{{ lead.name }}"
+                                data-region="{{ lead.region }}"
+                                data-website="{{ lead.website }}"
+                                data-flag="{{ 'Needs upgrade' if lead.performance_flag else 'Looks solid' }}"
+                            >
+                                Copy for AI research
+                            </button>
+                        </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="4" class="py-8 text-center text-sm text-slate-400">
+                        <td colspan="5" class="py-8 text-center text-sm text-slate-400">
+                            {% if stats.total %}
+                            No leads match these filters.
+                            {% else %}
                             No leads yet. Run a scrape to populate this list.
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -148,4 +223,29 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("click", function (event) {
+    const btn = event.target.closest(".copy-lead-btn");
+    if (!btn) return;
+
+    const lines = [
+        "Business: " + (btn.dataset.name || ""),
+        "Region: " + (btn.dataset.region || ""),
+        "Website: " + (btn.dataset.website || "None listed"),
+        "Site assessment: " + (btn.dataset.flag || ""),
+    ];
+    const text = lines.join("\n");
+
+    navigator.clipboard.writeText(text).then(function () {
+        const original = btn.textContent;
+        btn.textContent = "Copied!";
+        setTimeout(function () {
+            btn.textContent = original;
+        }, 1500);
+    });
+});
+</script>
 {% endblock %}
