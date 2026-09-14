@@ -8,14 +8,13 @@ from urllib import error, request
 import wikipedia
 from dotenv import dotenv_values
 
-from dashboard_db import Tool
+from dashboard_db import Project, Tool
 
 LOGGER = logging.getLogger(__name__)
 
 _CARD_CACHE = None
 _CARD_CACHE_EXPIRES_AT = 0
 _TRANSLATIONS_CACHE = None
-_PROJECTS_CACHE = None
 
 
 class Email:
@@ -160,17 +159,20 @@ def get_cards(db):
     return cards
 
 
-def get_projects():
-    global _PROJECTS_CACHE
+def get_projects(db):
+    if not db:
+        return []
 
-    if _PROJECTS_CACHE is not None:
-        return _PROJECTS_CACHE
-
-    try:
-        with open("projects.json", "r", encoding="utf-8") as file:
-            _PROJECTS_CACHE = json.load(file)
-    except Exception as exc:
-        LOGGER.error("Failed to load projects: %s", exc)
-        _PROJECTS_CACHE = []
-
-    return _PROJECTS_CACHE
+    with db.session() as session:
+        rows = session.query(Project).order_by(Project.sort_order.asc(), Project.id.asc()).all()
+        return [
+            {
+                "id": row.id,
+                "title": row.title,
+                "description": row.description,
+                "icon": row.icon or "bi-code-slash",
+                "tags": [tag.strip() for tag in (row.tags or "").split(",") if tag.strip()],
+                "url": row.url or "",
+            }
+            for row in rows
+        ]

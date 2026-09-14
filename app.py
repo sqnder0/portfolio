@@ -22,7 +22,7 @@ from flask_wtf.csrf import CSRFProtect
 from sqlalchemy import func
 
 from config import config_by_name
-from dashboard_db import Client, Prospect, build_dashboard_db_from_env
+from dashboard_db import Client, Project, Prospect, build_dashboard_db_from_env
 from email_dashboard import EmailDashboardStore
 from lead_scraper import scrape_prospects
 from rate_limiter import SubmissionTracker
@@ -199,7 +199,7 @@ def _render_page(template_name, language, **kwargs):
     return render_template(
         template_name,
         cards=get_cards(current_app.extensions.get("dashboard_db")),
-        projects=get_projects(),
+        projects=get_projects(current_app.extensions.get("dashboard_db")),
         current_language=language,
         get_translation=get_translation,
         translations=get_translations(),
@@ -636,6 +636,43 @@ def create_app():
             error_message=error_message,
         )
 
+    def render_projects_admin_dashboard(message="", error_message="", edit_project=None):
+        db, db_error = _get_dashboard_db_or_error()
+        projects = []
+
+        if db:
+            with db.session() as session:
+                rows = (
+                    session.query(Project)
+                    .order_by(Project.sort_order.asc(), Project.id.asc())
+                    .all()
+                )
+                projects = [
+                    {
+                        "id": row.id,
+                        "title": row.title,
+                        "description": row.description,
+                        "icon": row.icon,
+                        "tags": row.tags or "",
+                        "url": row.url or "",
+                        "sort_order": row.sort_order,
+                    }
+                    for row in rows
+                ]
+
+        if db_error and not error_message:
+            error_message = db_error
+
+        return render_template(
+            "dashboard_projects.html",
+            page_title="Projects",
+            active_page="dashboard_projects",
+            projects=projects,
+            edit_project=edit_project,
+            message=message,
+            error_message=error_message,
+        )
+
     @app.after_request
     def set_headers(response):
         response.headers["X-Content-Type-Options"] = "nosniff"
@@ -647,7 +684,7 @@ def create_app():
             "default-src 'self'; "
             "img-src 'self' data:; "
             "style-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com 'unsafe-inline'; "
-            "script-src 'self' https://cdn.jsdelivr.net https://cdn.tailwindcss.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; "
+            "script-src 'self' https://cdn.tailwindcss.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; "
             "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com; "
             "connect-src 'self' https://www.google.com/recaptcha/; "
             "frame-src https://www.google.com/recaptcha/; "
@@ -1280,6 +1317,132 @@ def create_app():
                 message = "Client added."
 
         return redirect(url_for("billing_dashboard", message=message))
+
+    @app.route("/dashboard/projects", methods=["GET"])
+    @require_dashboard_auth
+    def projects_admin_dashboard():
+        message = (request.args.get("message") or "").strip()
+        error_message = (request.args.get("error") or "").strip()
+        edit_project = None
+
+        edit_id_raw = (request.args.get("edit") or "").strip()
+        if edit_id_raw.isdigit():
+            db, db_error = _get_dashboard_db_or_error()
+            if db:
+                with db.session() as session:
+                    row = session.query(Project).filter(Project.id == int(edit_id_raw)).first()
+                    if row:
+                        edit_project = {
+                            "id": row.id,
+                            "title": row.title,
+                            "description": row.description,
+                            "icon": row.icon,
+                            "tags": row.tags or "",
+                            "url": row.url or "",
+                        }
+            elif not error_message:
+                error_message = db_error
+
+        return render_projects_admin_dashboard(
+            message=message,
+            error_message=error_message,
+            edit_project=edit_project,
+        )
+
+    @app.route("/dashboard/projects/save", methods=["POST"])
+    @require_dashboard_auth
+    def projects_admin_save():
+        db, db_error = _get_dashboard_db_or_error()
+        if not db:
+            return render_projects_admin_dashboard(error_message=db_error)
+
+        project_id_raw = (request.form.get("project_id") or "").strip()
+        title = _normalize_text(request.form.get("title"), 200)
+        description = _normalize_text(request.form.get("description"), 2000, allow_newlines=True)
+        icon = _normalize_text(request.form.get("icon"), 60) or "bi-code-slash"
+        tags = _normalize_text(request.form.get("tags"), 300)
+        url = _normalize_text(request.form.get("url"), 500)
+
+        if not title or not description:
+            return render_projects_admin_dashboard(
+                error_message="Title and description are required.",
+                edit_project={
+                    "id": project_id_raw,
+                    "title": title,
+                    "description": description,
+                    "icon": icon,
+                    "tags": tags,
+                    "url": url,
+                },
+            )
+
+        with db.session() as session:
+            if project_id_raw.isdigit():
+                project = session.query(Project).filter(Project.id == int(project_id_raw)).first()
+                if project:
+                    project.title = title
+                    project.description = description
+                    project.icon = icon
+                    project.tags = tags
+                    project.url = url
+                    message = "Project updated."
+                else:
+                    message = "Project not found."
+            else:
+                max_sort_order = session.query(func.max(Project.sort_order)).scalar() or 0
+                session.add(
+                    Project(
+                        title=title,
+                        description=description,
+                        icon=icon,
+                        tags=tags,
+                        url=url,
+                        sort_order=max_sort_order + 1,
+                    )
+                )
+                message = "Project added."
+
+        return redirect(url_for("projects_admin_dashboard", message=message))
+
+    @app.route("/dashboard/projects/<int:project_id>/delete", methods=["POST"])
+    @require_dashboard_auth
+    def projects_admin_delete(project_id):
+        db, db_error = _get_dashboard_db_or_error()
+        if not db:
+            return render_projects_admin_dashboard(error_message=db_error)
+
+        with db.session() as session:
+            session.query(Project).filter(Project.id == project_id).delete()
+
+        return redirect(url_for("projects_admin_dashboard", message="Project deleted."))
+
+    @app.route("/dashboard/projects/<int:project_id>/move", methods=["POST"])
+    @require_dashboard_auth
+    def projects_admin_move(project_id):
+        db, db_error = _get_dashboard_db_or_error()
+        if not db:
+            return render_projects_admin_dashboard(error_message=db_error)
+
+        direction = (request.form.get("direction") or "").strip()
+
+        with db.session() as session:
+            rows = session.query(Project).order_by(Project.sort_order.asc(), Project.id.asc()).all()
+            index = next((i for i, row in enumerate(rows) if row.id == project_id), None)
+            if index is not None:
+                if direction == "up" and index > 0:
+                    neighbor = rows[index - 1]
+                elif direction == "down" and index < len(rows) - 1:
+                    neighbor = rows[index + 1]
+                else:
+                    neighbor = None
+
+                if neighbor:
+                    rows[index].sort_order, neighbor.sort_order = (
+                        neighbor.sort_order,
+                        rows[index].sort_order,
+                    )
+
+        return redirect(url_for("projects_admin_dashboard"))
 
     return app
 

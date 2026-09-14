@@ -30,7 +30,6 @@ document.addEventListener("DOMContentLoaded", function () {
       heroSubtitle: "Full-stack web developer from Belgium who turns ideas into beautiful, fast, and conversion-focused websites that actually drive business results.",
       heroBio: "Since I started coding at age 9, I've been obsessed with building things. From Scratch as a kid to full-stack web development today, I've completed Harvard's CS50x and trained in modern web tech. Now I help businesses and startups build exceptional digital experiences.",
       statYears: "Years Coding",
-      statProjects: "Projects Delivered",
       statSatisfaction: "Client Satisfaction",
       ctaStartProject: "Start Project",
       ctaSeeWork: "See My Work",
@@ -88,7 +87,8 @@ document.addEventListener("DOMContentLoaded", function () {
       modalFccTitle: "Freecodecamp Responsive Web Design",
       footerText: "© 2026 Sander Pelgrims. All rights reserved. Full-Stack Web Developer from Belgium.",
       skillsTitleAccent: "My",
-      skillsTitleSuffix: "Toolkit"
+      skillsTitleSuffix: "Toolkit",
+      projectViewLink: "View project"
     },
     nl: {
       langEnglish: "English",
@@ -98,7 +98,6 @@ document.addEventListener("DOMContentLoaded", function () {
       heroSubtitle: "Full-stack webdeveloper uit België die ideeën omzet in mooie, snelle en conversiegerichte websites die écht resultaat opleveren.",
       heroBio: "Sinds ik op mijn 9e begon met coderen, ben ik gefascineerd door het bouwen van projecten. Van Scratch als kind tot full-stack webontwikkeling vandaag: ik behaalde Harvard's CS50x en train continu in moderne webtechnologie. Nu help ik bedrijven en startups om uitzonderlijke digitale ervaringen te bouwen.",
       statYears: "Jaar Ervaring",
-      statProjects: "Projecten Opgeleverd",
       statSatisfaction: "Tevreden Klanten",
       ctaStartProject: "Start Je Project",
       ctaSeeWork: "Bekijk Mijn Werk",
@@ -156,7 +155,8 @@ document.addEventListener("DOMContentLoaded", function () {
       modalFccTitle: "Freecodecamp Responsive Web Design",
       footerText: "© 2026 Sander Pelgrims. Alle rechten voorbehouden. Full-Stack Web Developer uit België.",
       skillsTitleAccent: "Mijn",
-      skillsTitleSuffix: "Toolkit"
+      skillsTitleSuffix: "Toolkit",
+      projectViewLink: "Bekijk project"
     },
     fr: {
       langEnglish: "English",
@@ -166,7 +166,6 @@ document.addEventListener("DOMContentLoaded", function () {
       heroSubtitle: "Developpeur full-stack en Belgique qui transforme les idees en sites beaux, rapides et orientes conversion.",
       heroBio: "Depuis l'age de 9 ans je cree avec du code. De Scratch au developpement full-stack moderne, je construis des experiences web efficaces pour startups et entreprises.",
       statYears: "Ans de Code",
-      statProjects: "Projets Livres",
       statSatisfaction: "Satisfaction Client",
       ctaStartProject: "Demarrer Projet",
       ctaSeeWork: "Voir Mon Travail",
@@ -224,7 +223,8 @@ document.addEventListener("DOMContentLoaded", function () {
       modalFccTitle: "Freecodecamp Responsive Web Design",
       footerText: "© 2026 Sander Pelgrims. Tous droits reserves. Developpeur Full-Stack en Belgique.",
       skillsTitleAccent: "Ma",
-      skillsTitleSuffix: "Palette d'Outils"
+      skillsTitleSuffix: "Palette d'Outils",
+      projectViewLink: "Voir le projet"
     }
   };
 

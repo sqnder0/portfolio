@@ -51,6 +51,33 @@ class Client(Base):
     )
 
 
+class Project(Base):
+    __tablename__ = "projects"
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String(200), nullable=False)
+    description = Column(Text, nullable=False)
+    icon = Column(String(60), nullable=False, default="bi-code-slash")
+    tags = Column(String(300), nullable=True)
+    url = Column(String(500), nullable=True)
+    sort_order = Column(Integer, nullable=False, default=0)
+
+
+DEFAULT_PROJECTS = [
+    {
+        "title": "QHorse Transport Calculator",
+        "description": (
+            "A transparent horse transport quote calculator built for QHorse. "
+            "Customers can quickly estimate transport costs with real-time pricing "
+            "calculations based on distance and number of horses."
+        ),
+        "icon": "bi-calculator",
+        "tags": "JavaScript, Quote System, Frontend",
+        "url": "https://calculator.qhorse.be",
+    },
+]
+
+
 class Tool(Base):
     __tablename__ = "tools"
 
@@ -165,6 +192,7 @@ class DashboardDatabase:
         Base.metadata.create_all(self.engine)
         self._apply_schema_patches()
         self._seed_tools()
+        self._seed_projects()
 
     def _apply_schema_patches(self):
         # Base.metadata.create_all only creates missing tables, not columns added
@@ -189,6 +217,13 @@ class DashboardDatabase:
                 return
             for index, tool in enumerate(DEFAULT_TOOLS):
                 session.add(Tool(sort_order=index, **tool))
+
+    def _seed_projects(self):
+        with self.session() as session:
+            if session.query(Project).first() is not None:
+                return
+            for index, project in enumerate(DEFAULT_PROJECTS):
+                session.add(Project(sort_order=index, **project))
 
     @contextmanager
     def session(self):
