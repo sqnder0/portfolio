@@ -98,6 +98,7 @@
       <div class="container-custom">
         <div class="about-wrapper">
           <div class="about-content">
+            <span class="section-eyebrow" data-i18n="eyebrowAbout">About Me</span>
             <h2><span data-i18n="aboutTitlePrefix">My</span> <span class="text-accent" data-i18n="aboutTitleAccent">Journey</span></h2>
             <p data-i18n="aboutP1">
               I've been passionate about code since age 9 when I started with Scratch. What began as a hobby has evolved into a career 
@@ -109,17 +110,17 @@
               reflects my commitment to quality and my passion for staying ahead of what's possible on the web.
             </p>
             <div class="about-highlights">
-              <div class="highlight">
+              <div class="highlight fade-in">
                 <i class="bi bi-mortarboard"></i>
                 <h4 data-i18n="highlight1Title">Continuous Learner</h4>
                 <p data-i18n="highlight1Text">Completed Harvard's CS50x course in computer science</p>
               </div>
-              <div class="highlight">
+              <div class="highlight fade-in">
                 <i class="bi bi-code-slash"></i>
                 <h4 data-i18n="highlight2Title">Full-Stack Developer</h4>
                 <p data-i18n="highlight2Text">Frontend, backend, databases—I handle the complete stack</p>
               </div>
-              <div class="highlight">
+              <div class="highlight fade-in">
                 <i class="bi bi-speedometer2"></i>
                 <h4 data-i18n="highlight3Title">Performance Obsessed</h4>
                 <p data-i18n="highlight3Text">Every millisecond counts—I optimize relentlessly</p>
@@ -133,6 +134,7 @@
     <!-- ========== WHY HIRE ME SECTION ========== -->
     <section id="why-hire">
       <div class="container-custom">
+        <span class="section-eyebrow" data-i18n="eyebrowWhy">Why Work With Me</span>
         <h2><span data-i18n="whyTitlePrefix">Why Choose</span> <span class="text-accent" data-i18n="whyTitleAccent">Me?</span></h2>
         <div class="why-grid">
           <div class="why-card fade-in">
@@ -162,10 +164,11 @@
     <!-- ========== SKILLS SECTION ========== -->
     <section id="skills">
       <div class="container-custom">
+        <span class="section-eyebrow" data-i18n="eyebrowSkills">Tech Stack</span>
         <h2><span class="text-accent" data-i18n="skillsTitleAccent">My</span> <span data-i18n="skillsTitleSuffix">Toolkit</span></h2>
         <div class="skills-grid">
           {% for card in cards %}
-          <div class="skill-card" title="{{ card['name'] }}">
+          <div class="skill-card fade-in" title="{{ card['name'] }}">
             <img
               src="/assets/logos/{{ card['path'] }}"
               alt="The logo of {{ card['name'] }}"
@@ -182,6 +185,7 @@
     <!-- ========== PROJECTS SECTION ========== -->
     <section id="projects">
       <div class="container-custom">
+        <span class="section-eyebrow" data-i18n="eyebrowProjects">Portfolio</span>
         <h2><span data-i18n="projectsTitlePrefix">Featured</span> <span class="text-accent" data-i18n="projectsTitleAccent">Projects</span></h2>
         <div class="projects-grid">
           {% for project in projects %}
@@ -212,9 +216,10 @@
     <!-- ========== CERTIFICATES SECTION ========== -->
     <section id="certificates">
       <div class="container-custom">
+        <span class="section-eyebrow" data-i18n="eyebrowCerts">Credentials</span>
         <h2><span class="text-accent" data-i18n="certTitleAccent">My</span> <span data-i18n="certTitle">Credentials</span></h2>
         <div class="certificates-grid">
-          <div class="cert-item" onclick="openModal('cs50x-modal')">
+          <div class="cert-item fade-in" onclick="openModal('cs50x-modal')">
             <img
               src="/assets/certificates/CS50x-min.webp"
               alt="Harvard CS50x certificate"
@@ -222,7 +227,7 @@
               decoding="async"
             />
           </div>
-          <div class="cert-item" onclick="openModal('freecodecamp-modal')">
+          <div class="cert-item fade-in" onclick="openModal('freecodecamp-modal')">
             <img
               src="/assets/certificates/freecodecamp.webp"
               alt="Freecodecamp responsive web design certificate"
@@ -239,6 +244,7 @@
       <div class="container-custom">
         <div class="contact-wrapper">
           <div class="contact-text">
+            <span class="section-eyebrow" data-i18n="eyebrowContact">Get In Touch</span>
             <h2><span data-i18n="contactTitlePrefix">Ready to</span> <span class="text-accent" data-i18n="contactTitleAccent">Get Started?</span></h2>
             <p data-i18n="contactIntro">
               Fill out the form below and I'll get back to you within 24 hours to

@@ -205,6 +205,38 @@
         color: var(--light-blue);
       }
 
+      /* ========== SECTION RHYTHM ========== */
+      section:not(#hero) {
+        position: relative;
+      }
+
+      section:not(#hero)::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(70%, 640px);
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(188, 255, 254, 0.35),
+          transparent
+        );
+      }
+
+      .section-eyebrow {
+        display: block;
+        text-align: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: var(--aqua-blue);
+        margin-bottom: 0.75rem;
+      }
+
       /* ========== HERO SECTION ========== */
       #hero {
         min-height: 100vh;
@@ -381,6 +413,7 @@
         justify-content: center;
         gap: 0.75rem;
         min-height: 48px;
+        animation: pulse-glow 2.8s ease-in-out infinite;
       }
 
       .btn-primary i {
@@ -390,6 +423,23 @@
       .btn-primary:hover {
         transform: translateY(-3px);
         box-shadow: 0 12px 24px rgba(45, 153, 174, 0.4);
+        animation-play-state: paused;
+      }
+
+      @keyframes pulse-glow {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(188, 255, 254, 0.35);
+        }
+        50% {
+          box-shadow: 0 0 0 10px rgba(188, 255, 254, 0);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .btn-primary {
+          animation: none;
+        }
       }
 
       .btn-secondary {
