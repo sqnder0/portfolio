@@ -1,10 +1,38 @@
 import json
 import logging
+import re
 import time
+import unicodedata
 from urllib import error, parse, request
 from urllib.parse import urlparse
 
 LOGGER = logging.getLogger(__name__)
+
+_NON_ALNUM_RE = re.compile(r"[^a-z0-9\s]")
+
+_LEGAL_SUFFIXES = {
+    "bvba", "bv", "nv", "sa", "sprl", "srl", "vzw", "asbl", "cv", "cvba",
+    "llc", "ltd", "inc", "gmbh", "sarl", "sas",
+}
+
+
+def normalize_business_name(name):
+    """Fold a business name down to a matching key: lowercase, accents
+    stripped, apostrophes dropped, other punctuation collapsed to spaces,
+    trailing legal-entity suffixes (BVBA, NV, Ltd, ...) stripped. "Bakkerij
+    De Zon BVBA", "Bakkerij De Zon.", "McDonald's", and "bakkerij  de  zon"
+    all collapse to a matching key, so the same business found via
+    different OSM elements or a later re-scrape reliably matches instead
+    of creating a duplicate.
+    """
+    ascii_name = unicodedata.normalize("NFKD", name or "").encode("ascii", "ignore").decode("ascii")
+    lowered = ascii_name.lower().replace("'", "").replace("`", "")
+    stripped = _NON_ALNUM_RE.sub(" ", lowered)
+    words = stripped.split()
+    while words and words[-1] in _LEGAL_SUFFIXES:
+        words.pop()
+    return " ".join(words)
+
 
 DEFAULT_KEYWORDS = [
     "bakery",
@@ -133,7 +161,7 @@ def scrape_prospects(region, keywords=None, max_results=40, user_agent="portfoli
             # from another query or a later re-scrape.
             name = " ".join(name.split())
 
-            dedupe_key = (name.lower(), region.lower())
+            dedupe_key = normalize_business_name(name)
             if dedupe_key in seen:
                 continue
 

@@ -24,7 +24,7 @@ from sqlalchemy import func
 from config import config_by_name
 from dashboard_db import Client, Project, Prospect, build_dashboard_db_from_env
 from email_dashboard import EmailDashboardStore
-from lead_scraper import scrape_prospects
+from lead_scraper import normalize_business_name, scrape_prospects
 from rate_limiter import SubmissionTracker
 from utils import Email, get_cards, get_projects, get_translation, get_translations
 
@@ -1199,15 +1199,16 @@ def create_app():
             )
 
         # Collapse near-duplicate leads (same business, different casing/
-        # whitespace across OSM elements or keyword queries) before they
-        # ever reach the database. Prefer whichever occurrence actually has
-        # a website tagged, since OSM sometimes returns the same POI twice
-        # with the site tag on only one of them, an earlier version of this
-        # kept whichever came first and could silently discard the copy
-        # with the real website in favor of a "no website" duplicate.
+        # punctuation/whitespace across OSM elements or keyword queries)
+        # before they ever reach the database. Prefer whichever occurrence
+        # actually has a website tagged, since OSM sometimes returns the
+        # same POI twice with the site tag on only one of them, an earlier
+        # version of this kept whichever came first and could silently
+        # discard the copy with the real website in favor of a "no website"
+        # duplicate.
         deduped_leads = {}
         for lead in scraped:
-            key = (" ".join(lead["name"].strip().lower().split()), lead["region"].strip().lower())
+            key = normalize_business_name(lead["name"])
             current = deduped_leads.get(key)
             if current is None or (not current.get("website") and lead.get("website")):
                 deduped_leads[key] = lead
@@ -1216,47 +1217,34 @@ def create_app():
         updated = 0
 
         with db.session() as session:
-            for lead in deduped_leads.values():
-                normalized_name = " ".join(lead["name"].strip().lower().split())
-                existing = (
-                    session.query(Prospect)
-                    .filter(
-                        func.lower(Prospect.name) == normalized_name,
-                        Prospect.region == lead["region"],
-                    )
-                    .first()
-                )
-                if not existing and lead.get("website"):
-                    # Fall back to matching by website: catches the same
-                    # business returned under a genuinely different name
-                    # string (legal suffix, punctuation) that the name-based
-                    # match above won't catch, when we at least know the
-                    # site is the same.
-                    existing = (
-                        session.query(Prospect)
-                        .filter(
-                            Prospect.website == lead["website"],
-                            Prospect.region == lead["region"],
-                        )
-                        .first()
-                    )
+            # Match against every existing prospect by normalized name only
+            # (not name+region): region text typed slightly differently
+            # across scrape sessions ("Antwerp, Belgium" vs "antwerp,
+            # belgium") was silently defeating the old exact-region match
+            # and producing repeat duplicates for the same business.
+            existing_by_name = {}
+            for row in session.query(Prospect).all():
+                existing_by_name.setdefault(normalize_business_name(row.name), row)
+
+            for key, lead in deduped_leads.items():
+                existing = existing_by_name.get(key)
                 if existing:
                     existing.website = lead["website"] or existing.website
                     existing.performance_flag = bool(lead["performance_flag"])
                     existing.category = lead.get("category") or existing.category
                     updated += 1
                 else:
-                    session.add(
-                        Prospect(
-                            name=lead["name"],
-                            region=lead["region"],
-                            website=lead["website"],
-                            category=lead.get("category"),
-                            performance_flag=bool(lead["performance_flag"]),
-                            contacted_status=False,
-                            not_interesting=False,
-                        )
+                    new_prospect = Prospect(
+                        name=lead["name"],
+                        region=lead["region"],
+                        website=lead["website"],
+                        category=lead.get("category"),
+                        performance_flag=bool(lead["performance_flag"]),
+                        contacted_status=False,
+                        not_interesting=False,
                     )
+                    session.add(new_prospect)
+                    existing_by_name[key] = new_prospect
                     added += 1
 
         if not scraped:
@@ -1272,6 +1260,60 @@ def create_app():
                 message=message,
             )
         )
+
+    @app.route("/dashboard/prospects/merge-duplicates", methods=["POST"])
+    @require_dashboard_auth
+    def prospects_merge_duplicates():
+        db, db_error = _get_dashboard_db_or_error()
+        if not db:
+            return render_prospects_dashboard(error_message=db_error)
+
+        merged_groups = 0
+        removed_rows = 0
+
+        with db.session() as session:
+            rows = session.query(Prospect).order_by(Prospect.id.asc()).all()
+            groups = {}
+            for row in rows:
+                groups.setdefault(normalize_business_name(row.name), []).append(row)
+
+            for group in groups.values():
+                if len(group) < 2:
+                    continue
+
+                keeper = group[0]
+                best_website = keeper.website or ""
+                best_flag = bool(keeper.performance_flag)
+                best_category = keeper.category or ""
+                any_contacted = bool(keeper.contacted_status)
+                any_not_interesting = bool(keeper.not_interesting)
+
+                for row in group[1:]:
+                    if not best_website and row.website:
+                        best_website = row.website
+                        best_flag = bool(row.performance_flag)
+                    if not best_category and row.category:
+                        best_category = row.category
+                    any_contacted = any_contacted or bool(row.contacted_status)
+                    any_not_interesting = any_not_interesting or bool(row.not_interesting)
+
+                keeper.website = best_website
+                keeper.performance_flag = best_flag
+                keeper.category = best_category or None
+                keeper.contacted_status = any_contacted
+                keeper.not_interesting = any_not_interesting
+
+                for row in group[1:]:
+                    session.delete(row)
+                    removed_rows += 1
+                merged_groups += 1
+
+        if merged_groups:
+            message = f"Merged {merged_groups} duplicate group(s), removed {removed_rows} extra row(s)."
+        else:
+            message = "No duplicates found."
+
+        return redirect(url_for("prospects_dashboard", message=message))
 
     @app.route("/dashboard/prospects/<int:prospect_id>/status", methods=["POST"])
     @require_dashboard_auth

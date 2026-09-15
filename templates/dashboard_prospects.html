@@ -83,7 +83,23 @@
                 <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Prospect Queue</p>
                 <h2 class="mt-2 text-xl font-semibold text-white">Scraped Leads</h2>
             </div>
-            <span class="rounded-full border border-line px-3 py-1 text-xs text-slate-300">{{ leads|length }} of {{ stats.total }} leads</span>
+            <div class="flex items-center gap-3">
+                <span class="rounded-full border border-line px-3 py-1 text-xs text-slate-300">{{ leads|length }} of {{ stats.total }} leads</span>
+                <form
+                    method="POST"
+                    action="/dashboard/prospects/merge-duplicates"
+                    class="confirm-delete-form"
+                    data-confirm-message="Merge duplicate prospects (matched by name)? Each group is collapsed into one row, keeping the best website/status data found. Extra rows are deleted. This cannot be undone."
+                >
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <button
+                        class="rounded-full border border-line px-3 py-1 text-xs text-slate-300 transition hover:border-accent hover:text-white"
+                        type="submit"
+                    >
+                        Merge Duplicates
+                    </button>
+                </form>
+            </div>
         </div>
 
         <form class="mt-5 flex flex-wrap items-end gap-3" method="GET" action="/dashboard/prospects">
