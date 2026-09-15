@@ -59,15 +59,15 @@ sent to the business.
 
 <task>
 Based on the research and the 1-2 chosen opportunities, write a cold
-email under 120 words: a personalized one-line opener tied to what you
-found (not flattery), a one-sentence framing of the problem, a specific
-value claim backed by the strongest opportunity, and one low-friction
-interest-check CTA. Then give 3 subject line options and 2 alternate
-first-line openers.
+email: a personalized one-line opener tied to what you found (not
+flattery), a one-sentence framing of the problem, a specific value
+claim backed by the strongest opportunity, and one low-friction
+interest-check CTA. Intro + body together stay under 120 words.
 </task>
 
 <constraints>
-- Under 120 words; no "I hope this finds you well"; exactly one CTA.
+- Intro + body under 120 words combined; no "I hope this finds you
+  well"; exactly one CTA.
 - No em dashes, use commas instead.
 - Specific and human, no buzzwords like "synergy" or "revolutionary".
 - The CTA asks for interest, not a big time commitment.
@@ -82,9 +82,27 @@ Part 1, Research brief (for me, not sent): the problem, the website
 assessment (or "no website"), the 1-2 strongest opportunities, and a
 one-line client-quality verdict (good / uncertain / weak fit, with why).
 
-Part 2, Copy-ready email block: 3 subject lines, the email body, 2
-alternate openers, and one note on how to personalize the opener at
-scale.
+Part 2, Copy-ready email block. My outreach emails always follow the
+same layout (header, subtitle, greeting, intro, body, CTA button,
+signature, footer), so break the email into exactly these fields, each
+labeled, so I can paste each one straight into the matching field in
+my Email Desk:
+
+- Subject: 3 options
+- Header title: short and punchy, sets the hook
+- Header subtitle: one line of context under the header
+- Greeting: e.g. "Hoi {voornaam}" or "Hallo {bedrijfsnaam}-team"
+- Intro text: 1-2 sentences, the personalized opener tied to what you found
+- Body content: one-sentence problem framing plus the value claim
+  backed by the strongest opportunity
+- CTA button text: short, e.g. "Laten we praten"
+- CTA URL: only a real mockup link if one exists for this business,
+  otherwise https://sqnder.dev
+- Signature name: Sander Pelgrims
+- Signature role: a short freelance title, e.g. "Freelance Web Developer"
+- Footer (small): optional one-liner, leave blank to use the template default
+- 2 alternate Intro text openers
+- One note on how to personalize the opener at scale
 </format>`;
 }
 
@@ -158,16 +176,15 @@ business.
 
 <task_per_business>
 Based on the research and the 1-2 chosen opportunities, write a cold
-email under 120 words: a personalized one-line opener tied to what you
-found (not flattery), a one-sentence framing of the problem, a specific
-value claim backed by the strongest opportunity, and one low-friction
-interest-check CTA. Then give 3 subject line options and 2 alternate
-first-line openers.
+email: a personalized one-line opener tied to what you found (not
+flattery), a one-sentence framing of the problem, a specific value
+claim backed by the strongest opportunity, and one low-friction
+interest-check CTA. Intro + body together stay under 120 words.
 </task_per_business>
 
 <constraints>
-- Under 120 words per email; no "I hope this finds you well"; exactly
-  one CTA per email.
+- Intro + body under 120 words combined per email; no "I hope this
+  finds you well"; exactly one CTA per email.
 - No em dashes, use commas instead.
 - Specific and human, no buzzwords like "synergy" or "revolutionary".
 - The CTA asks for interest, not a big time commitment.
@@ -182,9 +199,26 @@ Part 1, Research brief (for me, not sent): the problem, the website
 assessment (or "no website"), the 1-2 strongest opportunities, and a
 one-line client-quality verdict (good / uncertain / weak fit, with why).
 
-Part 2, Copy-ready email block: 3 subject lines, the email body, 2
-alternate openers, and one note on how to personalize the opener at
-scale.
+Part 2, Copy-ready email block. My outreach emails always follow the
+same layout (header, subtitle, greeting, intro, body, CTA button,
+signature, footer), so break each email into exactly these fields,
+each labeled, so I can paste each one straight into the matching field
+in my Email Desk:
+
+- Subject: 3 options
+- Header title: short and punchy, sets the hook
+- Header subtitle: one line of context under the header
+- Greeting: e.g. "Hoi {voornaam}" or "Hallo {bedrijfsnaam}-team"
+- Intro text: 1-2 sentences, the personalized opener tied to what you found
+- Body content: one-sentence problem framing plus the value claim
+  backed by the strongest opportunity
+- CTA button text: short, e.g. "Laten we praten"
+- CTA URL: only a real mockup link if one exists for that business,
+  otherwise https://sqnder.dev
+- Signature name: Sander Pelgrims
+- Signature role: a short freelance title, e.g. "Freelance Web Developer"
+- Footer (small): optional one-liner, leave blank to use the template default
+- 2 alternate Intro text openers
 
 Separate each business's output with a horizontal rule.
 </format>`;

@@ -137,7 +137,12 @@
                     >
                         <option value="">Choose a saved client or type manually</option>
                         {% for client in clients %}
-                        <option value="{{ client.id }}" {% if compose.client_id|string == client.id|string %}selected{% endif %}>
+                        <option
+                            value="{{ client.id }}"
+                            data-full-name="{{ client.full_name }}"
+                            data-email="{{ client.email }}"
+                            {% if compose.client_id|string == client.id|string %}selected{% endif %}
+                        >
                             {{ client.full_name }} - {{ client.email }}
                         </option>
                         {% endfor %}
@@ -348,4 +353,8 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script src="/dashboard-emails.js"></script>
 {% endblock %}
