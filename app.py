@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import re
+import threading
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from functools import wraps
@@ -29,6 +30,79 @@ from rate_limiter import SubmissionTracker
 from utils import Email, get_cards, get_projects, get_translation, get_translations
 
 LOGGER = logging.getLogger(__name__)
+
+# A full sweep can take anywhere from ~10s to ~90s against the free public
+# Overpass API depending on region size and how busy that shared instance
+# is, too long and too variable to hold a synchronous request open for.
+# Scraping runs in a background thread instead; this tracks whether one is
+# in flight so a second click doesn't kick off an overlapping scrape. This
+# is in-process state, so it's only accurate within a single worker
+# process -- fine for the single-operator scale this dashboard runs at,
+# but note it wouldn't coordinate across multiple gunicorn workers.
+_scrape_lock = threading.Lock()
+_scrape_state = {"running": False, "region": "", "last_message": ""}
+
+
+def _run_scrape_job(db, region, keywords, user_agent):
+    try:
+        scraped = scrape_prospects(region=region, keywords=keywords, user_agent=user_agent)
+    except Exception as exc:
+        LOGGER.exception("Background lead scraping failed for %r: %s", region, exc)
+        scraped = []
+
+    deduped_leads = {}
+    for lead in scraped:
+        key = normalize_business_name(lead["name"])
+        current = deduped_leads.get(key)
+        if current is None or (not current.get("website") and lead.get("website")):
+            deduped_leads[key] = lead
+
+    added = 0
+    updated = 0
+    try:
+        with db.session() as session:
+            # Match against every existing prospect by normalized name only
+            # (not name+region): region text typed slightly differently
+            # across scrape sessions ("Antwerp, Belgium" vs "antwerp,
+            # belgium") was silently defeating an exact-region match and
+            # producing repeat duplicates for the same business.
+            existing_by_name = {}
+            for row in session.query(Prospect).all():
+                existing_by_name.setdefault(normalize_business_name(row.name), row)
+
+            for key, lead in deduped_leads.items():
+                existing = existing_by_name.get(key)
+                if existing:
+                    existing.website = lead["website"] or existing.website
+                    existing.performance_flag = bool(lead["performance_flag"])
+                    existing.category = lead.get("category") or existing.category
+                    updated += 1
+                else:
+                    new_prospect = Prospect(
+                        name=lead["name"],
+                        region=lead["region"],
+                        website=lead["website"],
+                        category=lead.get("category"),
+                        performance_flag=bool(lead["performance_flag"]),
+                        contacted_status=False,
+                        not_interesting=False,
+                    )
+                    session.add(new_prospect)
+                    existing_by_name[key] = new_prospect
+                    added += 1
+    except Exception as exc:
+        LOGGER.exception("Failed to save scraped prospects for %r: %s", region, exc)
+
+    with _scrape_lock:
+        _scrape_state["running"] = False
+        if not scraped:
+            _scrape_state["last_message"] = f'No prospects found for "{region}".'
+        else:
+            _scrape_state["last_message"] = (
+                f'Scrape of "{region}" complete: found {len(scraped)}, '
+                f"added {added} new, refreshed {updated} existing."
+            )
+
 
 FIELD_LIMITS = {
     "first_name": 50,
@@ -611,6 +685,11 @@ def create_app():
         if db_error and not error_message:
             error_message = db_error
 
+        with _scrape_lock:
+            scrape_running = _scrape_state["running"]
+            scrape_region = _scrape_state["region"]
+            scrape_last_message = _scrape_state["last_message"]
+
         return render_template(
             "dashboard_prospects.html",
             page_title="Prospects",
@@ -626,6 +705,9 @@ def create_app():
             filter_interest=filter_interest,
             message=message,
             error_message=error_message,
+            scrape_running=scrape_running,
+            scrape_region=scrape_region,
+            scrape_last_message=scrape_last_message,
         )
 
     def render_billing_dashboard(message="", error_message=""):
@@ -1185,79 +1267,44 @@ def create_app():
                 keywords=keywords_raw,
             )
 
+        with _scrape_lock:
+            if _scrape_state["running"]:
+                return redirect(
+                    url_for(
+                        "prospects_dashboard",
+                        region=region,
+                        keywords=keywords_raw,
+                        error=f'A scrape for "{_scrape_state["region"]}" is already running. Wait for it to finish before starting another.',
+                    )
+                )
+            _scrape_state["running"] = True
+            _scrape_state["region"] = region
+
         keywords = [k.strip() for k in keywords_raw.split(",") if k.strip()]
         user_agent = f"portfolio-app/1.0 ({os.getenv('WEBSITE_URL', 'https://sqnder.dev')})"
 
-        try:
-            scraped = scrape_prospects(region=region, keywords=keywords, user_agent=user_agent)
-        except Exception as exc:
-            LOGGER.exception("Lead scraping failed: %s", exc)
-            return render_prospects_dashboard(
-                error_message="Lead scraping failed. Check logs for details.",
-                region=region,
-                keywords=keywords_raw,
-            )
-
-        # Collapse near-duplicate leads (same business, different casing/
-        # punctuation/whitespace across OSM elements or keyword queries)
-        # before they ever reach the database. Prefer whichever occurrence
-        # actually has a website tagged, since OSM sometimes returns the
-        # same POI twice with the site tag on only one of them, an earlier
-        # version of this kept whichever came first and could silently
-        # discard the copy with the real website in favor of a "no website"
-        # duplicate.
-        deduped_leads = {}
-        for lead in scraped:
-            key = normalize_business_name(lead["name"])
-            current = deduped_leads.get(key)
-            if current is None or (not current.get("website") and lead.get("website")):
-                deduped_leads[key] = lead
-
-        added = 0
-        updated = 0
-
-        with db.session() as session:
-            # Match against every existing prospect by normalized name only
-            # (not name+region): region text typed slightly differently
-            # across scrape sessions ("Antwerp, Belgium" vs "antwerp,
-            # belgium") was silently defeating the old exact-region match
-            # and producing repeat duplicates for the same business.
-            existing_by_name = {}
-            for row in session.query(Prospect).all():
-                existing_by_name.setdefault(normalize_business_name(row.name), row)
-
-            for key, lead in deduped_leads.items():
-                existing = existing_by_name.get(key)
-                if existing:
-                    existing.website = lead["website"] or existing.website
-                    existing.performance_flag = bool(lead["performance_flag"])
-                    existing.category = lead.get("category") or existing.category
-                    updated += 1
-                else:
-                    new_prospect = Prospect(
-                        name=lead["name"],
-                        region=lead["region"],
-                        website=lead["website"],
-                        category=lead.get("category"),
-                        performance_flag=bool(lead["performance_flag"]),
-                        contacted_status=False,
-                        not_interesting=False,
-                    )
-                    session.add(new_prospect)
-                    existing_by_name[key] = new_prospect
-                    added += 1
-
-        if not scraped:
-            message = "No new prospects found for this region."
-        else:
-            message = f"Scrape complete. Added {added} new prospects, refreshed {updated}."
+        # A full sweep can take well over a minute against the shared public
+        # Overpass API -- too long and too variable to hold the request
+        # open for, and risks a proxy/worker timeout even when the scrape
+        # itself would have succeeded. Run it in the background instead;
+        # the prospects list just picks up new rows whenever the page is
+        # next loaded or refreshed.
+        thread = threading.Thread(
+            target=_run_scrape_job,
+            args=(db, region, keywords, user_agent),
+            daemon=True,
+        )
+        thread.start()
 
         return redirect(
             url_for(
                 "prospects_dashboard",
                 region=region,
                 keywords=keywords_raw,
-                message=message,
+                message=(
+                    f'Scrape started for "{region}" in the background. A full sweep can take a minute '
+                    "or two, refresh this page shortly to see new leads."
+                ),
             )
         )
 

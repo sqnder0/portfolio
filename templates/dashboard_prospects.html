@@ -1,6 +1,21 @@
 {% extends "dashboard_base.html" %}
 
 {% block content %}
+{% if scrape_running %}
+<div
+    id="scrape-status-banner"
+    data-scrape-running="true"
+    class="flex items-center gap-3 rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm text-accent"
+>
+    <span class="h-2 w-2 animate-pulse rounded-full bg-accent"></span>
+    Scrape for "{{ scrape_region }}" is running in the background. This page will refresh automatically when it's done.
+</div>
+{% elif scrape_last_message %}
+<div class="rounded-2xl border border-line bg-panel px-4 py-3 text-sm text-slate-300">
+    {{ scrape_last_message }}
+</div>
+{% endif %}
+
 <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
     <div class="rounded-2xl border border-line bg-panel p-5 shadow-lg">
         <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Total Leads</p>
@@ -39,7 +54,9 @@
             <span class="rounded-full border border-line px-3 py-1 text-xs text-slate-300">Server-side scrape</span>
         </div>
         <p class="mt-4 text-sm text-slate-400">
-            Pull in nearby businesses and highlight missing or low-quality websites for outreach.
+            Leave industries blank to sweep every business type we know how to identify (~45 categories:
+            trades, shops, healthcare, professional services...) and highlight missing or low-quality websites
+            for outreach. Large chains are filtered out automatically.
         </p>
         <form class="mt-6 space-y-4" method="POST" action="/dashboard/prospects/scrape">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
@@ -55,12 +72,12 @@
                 />
             </div>
             <div>
-                <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="keywords">Industries (optional)</label>
+                <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="keywords">Industries (optional, leave blank for everything)</label>
                 <input
                     class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 placeholder:text-slate-300 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
                     id="keywords"
                     name="keywords"
-                    placeholder="bakery, dentist, gym"
+                    placeholder="bakery, dentist, gym (blank = sweep everything)"
                     value="{{ keywords }}"
                 />
             </div>
@@ -173,6 +190,14 @@
             <table class="w-full min-w-[900px] text-left text-sm">
                 <thead class="text-xs uppercase tracking-[0.2em] text-slate-500">
                     <tr>
+                        <th class="pb-3 pr-2">
+                            <input
+                                type="checkbox"
+                                id="select-all-leads"
+                                class="h-4 w-4 rounded border-line bg-slateBlue text-accent focus:ring-accent"
+                                aria-label="Select all leads"
+                            />
+                        </th>
                         <th class="pb-3">Lead</th>
                         <th class="pb-3">Website</th>
                         <th class="pb-3">Status</th>
@@ -184,6 +209,17 @@
                 <tbody class="divide-y divide-line text-slate-200">
                     {% for lead in leads %}
                     <tr class="align-top {% if lead.not_interesting %}opacity-50{% endif %}">
+                        <td class="py-4 pr-2">
+                            <input
+                                type="checkbox"
+                                class="lead-select-checkbox h-4 w-4 rounded border-line bg-slateBlue text-accent focus:ring-accent"
+                                data-name="{{ lead.name }}"
+                                data-region="{{ lead.region }}"
+                                data-website="{{ lead.website }}"
+                                data-category="{{ lead.category }}"
+                                aria-label="Select {{ lead.name }}"
+                            />
+                        </td>
                         <td class="py-4 pr-4">
                             <p class="font-medium text-white">{{ lead.name }}</p>
                             <p class="mt-1 text-xs text-slate-400">{{ lead.region }}</p>
@@ -312,7 +348,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="6" class="py-8 text-center text-sm text-slate-400">
+                        <td colspan="7" class="py-8 text-center text-sm text-slate-400">
                             {% if stats.total %}
                             No leads match these filters.
                             {% else %}
@@ -326,6 +362,28 @@
         </div>
     </div>
 </section>
+
+<div
+    id="bulk-copy-bar"
+    hidden
+    class="fixed bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-4 rounded-full border border-line bg-panelStrong px-5 py-3 shadow-glow"
+>
+    <span id="bulk-copy-count" class="text-sm text-slate-200">0 selected</span>
+    <button
+        type="button"
+        id="bulk-copy-btn"
+        class="rounded-full bg-accentDeep px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent"
+    >
+        Copy Selected for AI Research
+    </button>
+    <button
+        type="button"
+        id="bulk-copy-clear"
+        class="text-xs text-slate-400 underline decoration-dotted hover:text-white"
+    >
+        Clear
+    </button>
+</div>
 {% endblock %}
 
 {% block scripts %}
