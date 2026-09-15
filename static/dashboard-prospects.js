@@ -190,6 +190,23 @@ Separate each business's output with a horizontal rule.
 </format>`;
 }
 
+function setAllLeadCheckboxes(checked) {
+    document.querySelectorAll(".lead-select-checkbox").forEach(function (box) {
+        box.checked = checked;
+    });
+    syncSelectAllCheckbox();
+    updateBulkCopyBar();
+}
+
+function syncSelectAllCheckbox() {
+    const selectAll = document.getElementById("select-all-leads");
+    const boxes = document.querySelectorAll(".lead-select-checkbox");
+    if (!selectAll || !boxes.length) return;
+    selectAll.checked = Array.from(boxes).every(function (box) {
+        return box.checked;
+    });
+}
+
 function updateBulkCopyBar() {
     const bar = document.getElementById("bulk-copy-bar");
     const countLabel = document.getElementById("bulk-copy-count");
@@ -198,22 +215,25 @@ function updateBulkCopyBar() {
     const checked = document.querySelectorAll(".lead-select-checkbox:checked");
     if (checked.length === 0) {
         bar.hidden = true;
+        // Tailwind's .flex utility and the browser's [hidden] UA rule have
+        // equal specificity, and author CSS always wins over UA CSS, so a
+        // static "flex" class left on the element would keep it visible
+        // regardless of the hidden attribute. Only add "flex" while shown.
+        bar.classList.remove("flex");
         return;
     }
     bar.hidden = false;
+    bar.classList.add("flex");
     countLabel.textContent = checked.length + " selected";
 }
 
 document.addEventListener("change", function (event) {
     if (event.target.id === "select-all-leads") {
-        const boxes = document.querySelectorAll(".lead-select-checkbox");
-        boxes.forEach(function (box) {
-            box.checked = event.target.checked;
-        });
-        updateBulkCopyBar();
+        setAllLeadCheckboxes(event.target.checked);
         return;
     }
     if (event.target.classList.contains("lead-select-checkbox")) {
+        syncSelectAllCheckbox();
         updateBulkCopyBar();
     }
 });
@@ -232,13 +252,13 @@ document.addEventListener("click", function (event) {
         return;
     }
 
+    if (event.target.id === "select-all-visible-btn") {
+        setAllLeadCheckboxes(true);
+        return;
+    }
+
     if (event.target.id === "bulk-copy-clear") {
-        document.querySelectorAll(".lead-select-checkbox:checked").forEach(function (box) {
-            box.checked = false;
-        });
-        const selectAll = document.getElementById("select-all-leads");
-        if (selectAll) selectAll.checked = false;
-        updateBulkCopyBar();
+        setAllLeadCheckboxes(false);
         return;
     }
 
@@ -258,6 +278,33 @@ document.addEventListener("click", function (event) {
                 event.target.textContent = original;
             }, 1500);
         });
+        return;
+    }
+
+    if (event.target.id === "bulk-delete-btn") {
+        const ids = Array.from(document.querySelectorAll(".lead-select-checkbox:checked")).map(
+            function (box) {
+                return box.dataset.id;
+            }
+        );
+        if (!ids.length) return;
+
+        const confirmed = window.confirm(
+            "Delete " + ids.length + " selected prospect(s)? This cannot be undone."
+        );
+        if (!confirmed) return;
+
+        const form = document.getElementById("bulk-delete-form");
+        if (!form) return;
+
+        ids.forEach(function (id) {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "ids";
+            input.value = id;
+            form.appendChild(input);
+        });
+        form.submit();
     }
 });
 

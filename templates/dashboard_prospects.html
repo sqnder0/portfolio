@@ -100,8 +100,15 @@
                 <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Prospect Queue</p>
                 <h2 class="mt-2 text-xl font-semibold text-white">Scraped Leads</h2>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
                 <span class="rounded-full border border-line px-3 py-1 text-xs text-slate-300">{{ leads|length }} of {{ stats.total }} leads</span>
+                <button
+                    type="button"
+                    id="select-all-visible-btn"
+                    class="rounded-full border border-line px-3 py-1 text-xs text-slate-300 transition hover:border-accent hover:text-white"
+                >
+                    Select All Visible
+                </button>
                 <form
                     method="POST"
                     action="/dashboard/prospects/merge-duplicates"
@@ -186,39 +193,52 @@
             {% endif %}
         </form>
 
-        <div class="mt-6 overflow-x-auto">
-            <table class="w-full min-w-[900px] text-left text-sm">
-                <thead class="text-xs uppercase tracking-[0.2em] text-slate-500">
+        <div class="mt-6 max-h-[70vh] overflow-auto rounded-xl border border-line/60">
+            <table class="w-full min-w-[960px] text-left text-sm">
+                <thead class="sticky top-0 z-10 bg-slateBlue text-xs uppercase tracking-[0.2em] text-slate-500 shadow-[0_1px_0_0_rgba(148,163,184,0.22)]">
                     <tr>
-                        <th class="pb-3 pr-2">
-                            <input
-                                type="checkbox"
-                                id="select-all-leads"
-                                class="h-4 w-4 rounded border-line bg-slateBlue text-accent focus:ring-accent"
-                                aria-label="Select all leads"
-                            />
+                        <th class="py-3 pl-4 pr-2">
+                            <label class="group relative inline-flex h-5 w-5 cursor-pointer items-center justify-center">
+                                <input
+                                    type="checkbox"
+                                    id="select-all-leads"
+                                    class="peer sr-only"
+                                    aria-label="Select all leads"
+                                />
+                                <span class="absolute inset-0 rounded-md border border-slate-500 bg-slate-900/80 transition group-hover:border-accent peer-checked:border-accent peer-checked:bg-accentDeep"></span>
+                                <svg class="pointer-events-none relative h-3 w-3 scale-75 text-white opacity-0 transition peer-checked:scale-100 peer-checked:opacity-100" viewBox="0 0 16 16" fill="none">
+                                    <path d="M3 8.5L6.5 12L13 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </label>
                         </th>
-                        <th class="pb-3">Lead</th>
-                        <th class="pb-3">Website</th>
-                        <th class="pb-3">Status</th>
-                        <th class="pb-3">Pipeline</th>
-                        <th class="pb-3">Outreach</th>
-                        <th class="pb-3"></th>
+                        <th class="py-3">Lead</th>
+                        <th class="py-3">Website</th>
+                        <th class="py-3">Status</th>
+                        <th class="py-3">Pipeline</th>
+                        <th class="py-3">Outreach</th>
+                        <th class="py-3 pr-4"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-line text-slate-200">
                     {% for lead in leads %}
-                    <tr class="align-top {% if lead.not_interesting %}opacity-50{% endif %}">
-                        <td class="py-4 pr-2">
-                            <input
-                                type="checkbox"
-                                class="lead-select-checkbox h-4 w-4 rounded border-line bg-slateBlue text-accent focus:ring-accent"
-                                data-name="{{ lead.name }}"
-                                data-region="{{ lead.region }}"
-                                data-website="{{ lead.website }}"
-                                data-category="{{ lead.category }}"
-                                aria-label="Select {{ lead.name }}"
-                            />
+                    <tr class="align-top transition hover:bg-white/[0.04] {% if lead.not_interesting %}opacity-50{% endif %}">
+                        <td class="py-4 pl-4 pr-2">
+                            <label class="group relative inline-flex h-5 w-5 cursor-pointer items-center justify-center">
+                                <input
+                                    type="checkbox"
+                                    class="lead-select-checkbox peer sr-only"
+                                    data-id="{{ lead.id }}"
+                                    data-name="{{ lead.name }}"
+                                    data-region="{{ lead.region }}"
+                                    data-website="{{ lead.website }}"
+                                    data-category="{{ lead.category }}"
+                                    aria-label="Select {{ lead.name }}"
+                                />
+                                <span class="absolute inset-0 rounded-md border border-slate-500 bg-slate-900/80 transition group-hover:border-accent peer-checked:border-accent peer-checked:bg-accentDeep"></span>
+                                <svg class="pointer-events-none relative h-3 w-3 scale-75 text-white opacity-0 transition peer-checked:scale-100 peer-checked:opacity-100" viewBox="0 0 16 16" fill="none">
+                                    <path d="M3 8.5L6.5 12L13 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </label>
                         </td>
                         <td class="py-4 pr-4">
                             <p class="font-medium text-white">{{ lead.name }}</p>
@@ -323,7 +343,7 @@
                                 Copy for AI research
                             </button>
                         </td>
-                        <td class="py-4">
+                        <td class="py-4 pr-4">
                             <form
                                 method="POST"
                                 action="/dashboard/prospects/{{ lead.id }}/delete"
@@ -366,7 +386,7 @@
 <div
     id="bulk-copy-bar"
     hidden
-    class="fixed bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-4 rounded-full border border-line bg-panelStrong px-5 py-3 shadow-glow"
+    class="fixed bottom-6 left-1/2 z-20 -translate-x-1/2 flex-wrap items-center justify-center gap-4 rounded-full border border-line bg-panelStrong px-5 py-3 shadow-glow"
 >
     <span id="bulk-copy-count" class="text-sm text-slate-200">0 selected</span>
     <button
@@ -378,12 +398,32 @@
     </button>
     <button
         type="button"
+        id="bulk-delete-btn"
+        class="rounded-full border border-red-400/40 bg-red-400/10 px-4 py-2 text-sm font-semibold text-red-100 transition hover:border-red-400"
+    >
+        Delete Selected
+    </button>
+    <button
+        type="button"
         id="bulk-copy-clear"
         class="text-xs text-slate-400 underline decoration-dotted hover:text-white"
     >
         Clear
     </button>
 </div>
+
+<form
+    id="bulk-delete-form"
+    method="POST"
+    action="/dashboard/prospects/bulk-delete"
+    hidden
+>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <input type="hidden" name="filter_region" value="{{ filter_region }}" />
+    <input type="hidden" name="filter_flag" value="{{ filter_flag }}" />
+    <input type="hidden" name="filter_contacted" value="{{ filter_contacted }}" />
+    <input type="hidden" name="filter_interest" value="{{ filter_interest }}" />
+</form>
 {% endblock %}
 
 {% block scripts %}

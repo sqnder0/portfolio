@@ -1448,6 +1448,36 @@ def create_app():
             )
         )
 
+    @app.route("/dashboard/prospects/bulk-delete", methods=["POST"])
+    @require_dashboard_auth
+    def prospects_bulk_delete():
+        db, db_error = _get_dashboard_db_or_error()
+        if not db:
+            return render_prospects_dashboard(error_message=db_error)
+
+        ids = [int(raw) for raw in request.form.getlist("ids") if raw.isdigit()]
+        deleted = 0
+        if ids:
+            with db.session() as session:
+                deleted = (
+                    session.query(Prospect)
+                    .filter(Prospect.id.in_(ids))
+                    .delete(synchronize_session=False)
+                )
+
+        message = f"Deleted {deleted} prospect(s)." if deleted else "No prospects were selected."
+
+        return redirect(
+            url_for(
+                "prospects_dashboard",
+                filter_region=request.form.get("filter_region", ""),
+                filter_flag=request.form.get("filter_flag", ""),
+                filter_contacted=request.form.get("filter_contacted", ""),
+                filter_interest=request.form.get("filter_interest", ""),
+                message=message,
+            )
+        )
+
     @app.route("/dashboard/billing", methods=["GET"])
     @require_dashboard_auth
     def billing_dashboard():
