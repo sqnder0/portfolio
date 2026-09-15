@@ -120,8 +120,7 @@ EMAIL_DASHBOARD_LIMITS = {
     "header_title": 120,
     "header_subtitle": 180,
     "greeting": 180,
-    "intro_text": 500,
-    "body_text": 5000,
+    "message_text": 5000,
     "cta_text": 80,
     "cta_url": 500,
     "signature_name": 120,
@@ -300,8 +299,7 @@ def _dashboard_compose_defaults():
         "header_title": "A Quick Update",
         "header_subtitle": "Thanks for staying connected",
         "greeting": "Hello,",
-        "intro_text": "I wanted to share a quick update with you.",
-        "body_text": "",
+        "message_text": "I wanted to share a quick update with you.",
         "cta_text": "Visit Website",
         "cta_url": os.getenv("WEBSITE_URL", "https://sqnder.dev"),
         "signature_name": "Sander Pelgrims",
@@ -327,11 +325,8 @@ def _build_dashboard_payload(form, selected_client=None):
             form.get("header_subtitle"), EMAIL_DASHBOARD_LIMITS["header_subtitle"]
         ),
         "greeting": _normalize_text(form.get("greeting"), EMAIL_DASHBOARD_LIMITS["greeting"]),
-        "intro_text": _normalize_text(
-            form.get("intro_text"), EMAIL_DASHBOARD_LIMITS["intro_text"], allow_newlines=True
-        ),
-        "body_text": _normalize_text(
-            form.get("body_text"), EMAIL_DASHBOARD_LIMITS["body_text"], allow_newlines=True
+        "message_text": _normalize_text(
+            form.get("message_text"), EMAIL_DASHBOARD_LIMITS["message_text"], allow_newlines=True
         ),
         "cta_text": _normalize_text(form.get("cta_text"), EMAIL_DASHBOARD_LIMITS["cta_text"]),
         "cta_url": _normalize_text(form.get("cta_url"), EMAIL_DASHBOARD_LIMITS["cta_url"]),
@@ -370,8 +365,7 @@ def _validate_dashboard_payload(payload):
         "header_title",
         "header_subtitle",
         "greeting",
-        "intro_text",
-        "body_text",
+        "message_text",
         "signature_name",
     ]
     for field in required_fields:
@@ -402,8 +396,7 @@ def _payload_to_compose(payload, draft_id=None):
             "header_title": payload.get("header_title", ""),
             "header_subtitle": payload.get("header_subtitle", ""),
             "greeting": payload.get("greeting", ""),
-            "intro_text": payload.get("intro_text", ""),
-            "body_text": payload.get("body_text", ""),
+            "message_text": payload.get("message_text", ""),
             "cta_text": payload.get("cta_text", ""),
             "cta_url": payload.get("cta_url", ""),
             "signature_name": payload.get("signature_name", ""),
@@ -537,8 +530,7 @@ def create_app():
             header_title=payload["header_title"],
             header_subtitle=payload["header_subtitle"],
             greeting=payload["greeting"],
-            intro_text=payload["intro_text"],
-            body_text=payload["body_text"],
+            message_text=payload["message_text"],
             cta_text=payload["cta_text"],
             cta_url=payload["cta_url"],
             signature_name=payload["signature_name"],
@@ -1229,8 +1221,7 @@ def create_app():
             header_title=payload.get("header_title"),
             header_subtitle=payload.get("header_subtitle"),
             greeting=payload.get("greeting"),
-            intro_text=payload.get("intro_text"),
-            body_text=payload.get("body_text"),
+            message_text=payload.get("message_text"),
             cta_text=payload.get("cta_text"),
             cta_url=payload.get("cta_url"),
             signature_name=payload.get("signature_name"),

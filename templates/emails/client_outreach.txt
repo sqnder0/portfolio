@@ -3,9 +3,7 @@
 
 {{ greeting }}
 
-{{ intro_text }}
-
-{{ body_text }}
+{{ message_text }}
 
 {% if cta_text and cta_url %}
 Action: {{ cta_text }} — {{ cta_url }}

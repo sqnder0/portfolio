@@ -138,8 +138,7 @@ class EmailDraft(Base):
     header_title = Column(String(300), nullable=False)
     header_subtitle = Column(String(300), nullable=False)
     greeting = Column(String(300), nullable=False)
-    intro_text = Column(Text, nullable=False)
-    body_text = Column(Text, nullable=False)
+    message_text = Column(Text, nullable=False)
     cta_text = Column(String(200), nullable=True)
     cta_url = Column(String(500), nullable=True)
     signature_name = Column(String(200), nullable=False)
@@ -162,8 +161,7 @@ class SentEmail(Base):
     header_title = Column(String(300), nullable=False)
     header_subtitle = Column(String(300), nullable=False)
     greeting = Column(String(300), nullable=False)
-    intro_text = Column(Text, nullable=False)
-    body_text = Column(Text, nullable=False)
+    message_text = Column(Text, nullable=False)
     cta_text = Column(String(200), nullable=True)
     cta_url = Column(String(500), nullable=True)
     signature_name = Column(String(200), nullable=False)
@@ -210,6 +208,41 @@ class DashboardDatabase:
                 )
         except Exception:
             pass
+
+        # Merge the old separate intro_text/body_text columns into one
+        # message_text column. Each step is its own transaction so a
+        # database that has already completed the migration (and no longer
+        # has intro_text/body_text to read from) doesn't roll back the
+        # earlier, still-relevant steps when a later one errors.
+        for table in ("email_drafts", "sent_emails"):
+            try:
+                with self.engine.begin() as conn:
+                    conn.execute(text(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS message_text TEXT"))
+            except Exception:
+                pass
+            try:
+                with self.engine.begin() as conn:
+                    conn.execute(
+                        text(
+                            f"UPDATE {table} SET message_text = TRIM(BOTH E'\\n' FROM "
+                            "COALESCE(intro_text, '') || CASE WHEN COALESCE(intro_text, '') <> '' "
+                            "AND COALESCE(body_text, '') <> '' THEN E'\\n\\n' ELSE '' END || "
+                            "COALESCE(body_text, '')) WHERE message_text IS NULL"
+                        )
+                    )
+            except Exception:
+                pass
+            try:
+                with self.engine.begin() as conn:
+                    conn.execute(text(f"ALTER TABLE {table} ALTER COLUMN message_text SET NOT NULL"))
+            except Exception:
+                pass
+            try:
+                with self.engine.begin() as conn:
+                    conn.execute(text(f"ALTER TABLE {table} DROP COLUMN IF EXISTS intro_text"))
+                    conn.execute(text(f"ALTER TABLE {table} DROP COLUMN IF EXISTS body_text"))
+            except Exception:
+                pass
 
     def _seed_tools(self):
         with self.session() as session:

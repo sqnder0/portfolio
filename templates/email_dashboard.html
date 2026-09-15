@@ -219,25 +219,14 @@
                 </div>
 
                 <div>
-                    <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="intro_text">Intro text</label>
+                    <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="message_text">Message</label>
                     <textarea
                         class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
-                        id="intro_text"
-                        name="intro_text"
-                        rows="3"
+                        id="message_text"
+                        name="message_text"
+                        rows="8"
                         required
-                    >{{ compose.intro_text }}</textarea>
-                </div>
-
-                <div>
-                    <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="body_text">Body content</label>
-                    <textarea
-                        class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
-                        id="body_text"
-                        name="body_text"
-                        rows="6"
-                        required
-                    >{{ compose.body_text }}</textarea>
+                    >{{ compose.message_text }}</textarea>
                 </div>
 
                 <div class="grid gap-4 md:grid-cols-2">
