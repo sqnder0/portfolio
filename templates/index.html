@@ -192,6 +192,17 @@
           <div class="project-card fade-in">
             <div class="project-image">
               <i class="bi {{ project.icon }}"></i>
+              {% if project.url %}
+              <div class="project-preview-frame" aria-hidden="true">
+                <iframe
+                  src="{{ project.url }}"
+                  tabindex="-1"
+                  scrolling="no"
+                  loading="lazy"
+                  title="Preview of {{ project.title }}"
+                ></iframe>
+              </div>
+              {% endif %}
             </div>
             <div class="project-content">
               <h3>{{ project.title }}</h3>

@@ -677,14 +677,33 @@
       }
 
       .project-image {
+        position: relative;
         width: 100%;
         aspect-ratio: 16/9;
+        overflow: hidden;
         background: linear-gradient(135deg, var(--blue), var(--aqua-blue));
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 3rem;
         color: var(--white);
+      }
+
+      .project-preview-frame {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      .project-preview-frame iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 333.33%;
+        height: 333.33%;
+        border: 0;
+        transform: scale(0.3);
+        transform-origin: 0 0;
       }
 
       .project-content {

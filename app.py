@@ -822,7 +822,7 @@ def create_app():
             "script-src 'self' https://cdn.tailwindcss.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; "
             "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com; "
             "connect-src 'self' https://www.google.com/recaptcha/; "
-            "frame-src https://www.google.com/recaptcha/; "
+            "frame-src https:; "
             "frame-ancestors 'none';"
         )
         if request.endpoint == "static":
