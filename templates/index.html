@@ -170,7 +170,7 @@
           {% for card in cards %}
           <div class="skill-card fade-in" title="{{ card['name'] }}">
             <img
-              src="/assets/logos/{{ card['path'] }}"
+              src="{{ card['image_src'] }}"
               alt="The logo of {{ card['name'] }}"
               loading="lazy"
               decoding="async"

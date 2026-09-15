@@ -1,0 +1,160 @@
+{% extends "dashboard_base.html" %}
+
+{% block content %}
+<section class="grid gap-6 lg:grid-cols-[1.1fr_2fr]">
+    <div class="rounded-3xl border border-line bg-panelStrong p-6 shadow-lg">
+        <p class="text-xs uppercase tracking-[0.3em] text-slate-400">
+            {% if edit_skill and edit_skill.id %}Edit Skill{% else %}Add Skill{% endif %}
+        </p>
+        <h2 class="mt-2 text-xl font-semibold text-white">My Toolkit</h2>
+        <p class="mt-2 text-sm text-slate-400">
+            Controls what shows up in the "My Toolkit" section on the public site.
+        </p>
+
+        <form class="mt-6 space-y-4" method="POST" action="/dashboard/skills/save">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input type="hidden" name="skill_id" value="{{ edit_skill.id if edit_skill else '' }}" />
+
+            <div>
+                <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="name">Name</label>
+                <input
+                    class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 placeholder:text-slate-300 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                    id="name"
+                    name="name"
+                    placeholder="Vue.js"
+                    value="{{ edit_skill.name if edit_skill else '' }}"
+                    required
+                />
+            </div>
+
+            <div>
+                <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="path">Icon</label>
+                <input
+                    class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 placeholder:text-slate-300 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                    id="path"
+                    name="path"
+                    placeholder="vue.svg or https://cdn.example.com/vue.svg"
+                    value="{{ edit_skill.path if edit_skill else '' }}"
+                    required
+                />
+                <p class="mt-1 text-xs text-slate-500">
+                    Either a filename already in <code>static/assets/logos/</code>, or a full
+                    <code>https://</code> image URL.
+                </p>
+            </div>
+
+            <div>
+                <label class="text-xs uppercase tracking-[0.3em] text-slate-400" for="wiki">Wikipedia term (optional)</label>
+                <input
+                    class="mt-2 w-full rounded-xl border border-slate-400/70 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 placeholder:text-slate-300 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                    id="wiki"
+                    name="wiki"
+                    placeholder="Vue.js"
+                    value="{{ edit_skill.wiki if edit_skill else '' }}"
+                />
+                <p class="mt-1 text-xs text-slate-500">
+                    Used to pull a one-line description from Wikipedia. Defaults to the name above if left blank.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+                <button
+                    class="rounded-xl bg-accentDeep px-4 py-2 text-sm font-semibold text-white shadow-glow transition hover:bg-accent"
+                    type="submit"
+                >
+                    {% if edit_skill and edit_skill.id %}Save Changes{% else %}Add Skill{% endif %}
+                </button>
+                {% if edit_skill and edit_skill.id %}
+                <a
+                    class="rounded-xl border border-line px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-accent hover:text-white"
+                    href="/dashboard/skills"
+                >
+                    Cancel
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <div class="min-w-0 rounded-3xl border border-line bg-panel p-6 shadow-lg">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Live Order</p>
+                <h2 class="mt-2 text-xl font-semibold text-white">Skills</h2>
+            </div>
+            <span class="rounded-full border border-line px-3 py-1 text-xs text-slate-300">{{ skills|length }} skills</span>
+        </div>
+
+        <div class="mt-6 grid gap-4">
+            {% for skill in skills %}
+            <div class="rounded-2xl border border-line bg-panelStrong p-4">
+                <div class="flex items-start justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <img
+                            class="h-8 w-8 rounded object-contain"
+                            src="{{ skill.path if skill.path.startswith('http') else '/assets/logos/' + skill.path }}"
+                            alt=""
+                            loading="lazy"
+                        />
+                        <div>
+                            <p class="font-medium text-white">{{ skill.name }}</p>
+                            <p class="mt-1 text-xs text-slate-500">{{ skill.path }}</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-end gap-2">
+                        <div class="flex gap-2">
+                            <form method="POST" action="/dashboard/skills/{{ skill.id }}/move">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                <input type="hidden" name="direction" value="up" />
+                                <button
+                                    class="rounded-lg border border-line px-2 py-1 text-xs text-slate-300 transition hover:border-accent hover:text-white"
+                                    type="submit"
+                                    {% if loop.first %}disabled{% endif %}
+                                >
+                                    <i class="bi bi-arrow-up"></i>
+                                </button>
+                            </form>
+                            <form method="POST" action="/dashboard/skills/{{ skill.id }}/move">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                <input type="hidden" name="direction" value="down" />
+                                <button
+                                    class="rounded-lg border border-line px-2 py-1 text-xs text-slate-300 transition hover:border-accent hover:text-white"
+                                    type="submit"
+                                    {% if loop.last %}disabled{% endif %}
+                                >
+                                    <i class="bi bi-arrow-down"></i>
+                                </button>
+                            </form>
+                        </div>
+                        <div class="flex gap-2">
+                            <a
+                                class="rounded-lg border border-line px-3 py-1 text-xs text-slate-300 transition hover:border-accent hover:text-white"
+                                href="/dashboard/skills?edit={{ skill.id }}"
+                            >
+                                Edit
+                            </a>
+                            <form
+                                method="POST"
+                                action="/dashboard/skills/{{ skill.id }}/delete"
+                                class="confirm-delete-form"
+                                data-confirm-message="Delete {{ skill.name }}? This cannot be undone."
+                            >
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                <button
+                                    class="rounded-lg border border-red-400/40 bg-red-400/10 px-3 py-1 text-xs text-red-100 transition hover:border-red-400"
+                                    type="submit"
+                                >
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-sm text-slate-400">No skills yet. Add one on the left.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

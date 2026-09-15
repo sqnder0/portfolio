@@ -129,6 +129,15 @@ def get_translation(language, *keys, default=""):
     return value
 
 
+def clear_cards_cache():
+    """Invalidate the cached toolkit cards so an added/edited/removed skill
+    shows up on the next page load instead of waiting out the TTL below.
+    """
+    global _CARD_CACHE, _CARD_CACHE_EXPIRES_AT
+    _CARD_CACHE = None
+    _CARD_CACHE_EXPIRES_AT = 0
+
+
 def get_cards(db):
     global _CARD_CACHE, _CARD_CACHE_EXPIRES_AT
 
@@ -136,6 +145,9 @@ def get_cards(db):
     if _CARD_CACHE and now < _CARD_CACHE_EXPIRES_AT:
         return _CARD_CACHE
 
+    # Wikipedia lookups below are the expensive part worth caching (one
+    # external HTTP call per skill on every homepage view otherwise), not
+    # the DB query itself.
     cache_ttl = int(os.getenv("TOOLS_CACHE_TTL", "1800"))
 
     cards = []
@@ -143,7 +155,13 @@ def get_cards(db):
         with db.session() as session:
             rows = session.query(Tool).order_by(Tool.sort_order.asc()).all()
             cards = [
-                {"id": row.id, "name": row.name, "path": row.path, "wiki": row.wiki}
+                {
+                    "id": row.id,
+                    "name": row.name,
+                    "path": row.path,
+                    "wiki": row.wiki,
+                    "image_src": row.path if row.path.startswith(("http://", "https://")) else f"/assets/logos/{row.path}",
+                }
                 for row in rows
             ]
 

@@ -23,11 +23,11 @@ from flask_wtf.csrf import CSRFProtect
 from sqlalchemy import func
 
 from config import config_by_name
-from dashboard_db import Client, Project, Prospect, build_dashboard_db_from_env
+from dashboard_db import Client, Project, Prospect, Tool, build_dashboard_db_from_env
 from email_dashboard import EmailDashboardStore
 from lead_scraper import normalize_business_name, scrape_prospects
 from rate_limiter import SubmissionTracker
-from utils import Email, get_cards, get_projects, get_translation, get_translations
+from utils import Email, clear_cards_cache, get_cards, get_projects, get_translation, get_translations
 
 LOGGER = logging.getLogger(__name__)
 
@@ -138,6 +138,11 @@ def _normalize_text(value, max_length, allow_newlines=False):
     else:
         text = text.replace("\r", " ").replace("\n", " ")
     return text
+
+
+def _slugify(text, max_length=60):
+    slug = re.sub(r"[^a-z0-9]+", "-", text.strip().lower()).strip("-")
+    return slug[:max_length] or "item"
 
 
 def _build_form_data(form):
@@ -768,6 +773,41 @@ def create_app():
             error_message=error_message,
         )
 
+    def render_skills_admin_dashboard(message="", error_message="", edit_skill=None):
+        db, db_error = _get_dashboard_db_or_error()
+        skills = []
+
+        if db:
+            with db.session() as session:
+                rows = (
+                    session.query(Tool)
+                    .order_by(Tool.sort_order.asc(), Tool.id.asc())
+                    .all()
+                )
+                skills = [
+                    {
+                        "id": row.id,
+                        "name": row.name,
+                        "path": row.path,
+                        "wiki": row.wiki,
+                        "sort_order": row.sort_order,
+                    }
+                    for row in rows
+                ]
+
+        if db_error and not error_message:
+            error_message = db_error
+
+        return render_template(
+            "dashboard_skills.html",
+            page_title="Skills",
+            active_page="dashboard_skills",
+            skills=skills,
+            edit_skill=edit_skill,
+            message=message,
+            error_message=error_message,
+        )
+
     @app.after_request
     def set_headers(response):
         response.headers["X-Content-Type-Options"] = "nosniff"
@@ -777,7 +817,7 @@ def create_app():
             "Content-Security-Policy"
         ] = (
             "default-src 'self'; "
-            "img-src 'self' data:; "
+            "img-src 'self' data: https:; "
             "style-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com 'unsafe-inline'; "
             "script-src 'self' https://cdn.tailwindcss.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/; "
             "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com; "
@@ -1586,6 +1626,126 @@ def create_app():
                     )
 
         return redirect(url_for("projects_admin_dashboard"))
+
+    @app.route("/dashboard/skills", methods=["GET"])
+    @require_dashboard_auth
+    def skills_admin_dashboard():
+        message = (request.args.get("message") or "").strip()
+        error_message = (request.args.get("error") or "").strip()
+        edit_skill = None
+
+        edit_id = (request.args.get("edit") or "").strip()
+        if edit_id:
+            db, db_error = _get_dashboard_db_or_error()
+            if db:
+                with db.session() as session:
+                    row = session.query(Tool).filter(Tool.id == edit_id).first()
+                    if row:
+                        edit_skill = {
+                            "id": row.id,
+                            "name": row.name,
+                            "path": row.path,
+                            "wiki": row.wiki,
+                        }
+            elif not error_message:
+                error_message = db_error
+
+        return render_skills_admin_dashboard(
+            message=message,
+            error_message=error_message,
+            edit_skill=edit_skill,
+        )
+
+    @app.route("/dashboard/skills/save", methods=["POST"])
+    @require_dashboard_auth
+    def skills_admin_save():
+        db, db_error = _get_dashboard_db_or_error()
+        if not db:
+            return render_skills_admin_dashboard(error_message=db_error)
+
+        skill_id = (request.form.get("skill_id") or "").strip()
+        name = _normalize_text(request.form.get("name"), 120)
+        path = _normalize_text(request.form.get("path"), 500)
+        wiki = _normalize_text(request.form.get("wiki"), 200) or name
+
+        if not name or not path:
+            return render_skills_admin_dashboard(
+                error_message="Name and icon are required.",
+                edit_skill={"id": skill_id, "name": name, "path": path, "wiki": wiki},
+            )
+
+        with db.session() as session:
+            if skill_id:
+                skill = session.query(Tool).filter(Tool.id == skill_id).first()
+                if skill:
+                    skill.name = name
+                    skill.path = path
+                    skill.wiki = wiki
+                    message = "Skill updated."
+                else:
+                    message = "Skill not found."
+            else:
+                new_id = _slugify(name)
+                suffix = 2
+                while session.query(Tool).filter(Tool.id == new_id).first() is not None:
+                    new_id = f"{_slugify(name)}-{suffix}"
+                    suffix += 1
+                max_sort_order = session.query(func.max(Tool.sort_order)).scalar() or 0
+                session.add(
+                    Tool(
+                        id=new_id,
+                        name=name,
+                        path=path,
+                        wiki=wiki,
+                        sort_order=max_sort_order + 1,
+                    )
+                )
+                message = "Skill added."
+
+        clear_cards_cache()
+        return redirect(url_for("skills_admin_dashboard", message=message))
+
+    @app.route("/dashboard/skills/<skill_id>/delete", methods=["POST"])
+    @require_dashboard_auth
+    def skills_admin_delete(skill_id):
+        db, db_error = _get_dashboard_db_or_error()
+        if not db:
+            return render_skills_admin_dashboard(error_message=db_error)
+
+        with db.session() as session:
+            session.query(Tool).filter(Tool.id == skill_id).delete()
+
+        clear_cards_cache()
+        return redirect(url_for("skills_admin_dashboard", message="Skill deleted."))
+
+    @app.route("/dashboard/skills/<skill_id>/move", methods=["POST"])
+    @require_dashboard_auth
+    def skills_admin_move(skill_id):
+        db, db_error = _get_dashboard_db_or_error()
+        if not db:
+            return render_skills_admin_dashboard(error_message=db_error)
+
+        direction = (request.form.get("direction") or "").strip()
+
+        with db.session() as session:
+            rows = session.query(Tool).order_by(Tool.sort_order.asc(), Tool.id.asc()).all()
+            index = next((i for i, row in enumerate(rows) if row.id == skill_id), None)
+            if index is not None:
+                if direction == "up" and index > 0:
+                    neighbor = rows[index - 1]
+                elif direction == "down" and index < len(rows) - 1:
+                    neighbor = rows[index + 1]
+                else:
+                    neighbor = None
+
+                if neighbor:
+                    rows[index].sort_order, neighbor.sort_order = (
+                        neighbor.sort_order,
+                        rows[index].sort_order,
+                    )
+
+        clear_cards_cache()
+        return redirect(url_for("skills_admin_dashboard"))
 
     return app
 
